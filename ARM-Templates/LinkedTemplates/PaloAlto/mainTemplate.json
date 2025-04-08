@@ -147,17 +147,18 @@
     }
   },
   "variables": {
-    "workbook-source": "[concat(resourceGroup().id, '/providers/Microsoft.OperationalInsights/workspaces/',parameters('workspace'))]",
-    "_workbook-source": "[variables('workbook-source')]",
-    "workspace-dependency": "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]",
-    "connector1-source": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.OperationalInsights/workspaces/',parameters('workspace'),'/providers/Microsoft.SecurityInsights/dataConnectors/',parameters('connector1-name'))]",
-    "_connector1-source": "[variables('connector1-source')]"
+    "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+    "deploymentApiVersion": "2022-09-01",
+    "workbookApiVersion": "2022-04-01",
+    "alertRuleApiVersion": "2023-11-01",
+    "dataConnectorApiVersion": "2023-11-01",
+    "savedSearchApiVersion": "2022-10-01"
   },
   "resources": [
     {
       "name": "pid-f6d55c1c-dead-4596-9a2c-3b345e604019-partnercenter",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-10-01",
+      "apiVersion": "[variables('deploymentApiVersion')]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -172,21 +173,27 @@
       "name": "[parameters('workbook1-id')]",
       "location": "[parameters('workspace-location')]",
       "kind": "shared",
-      "apiVersion": "2020-02-12",
+      "apiVersion": "[variables('workbookApiVersion')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "displayName": "[concat(parameters('workbook1-name'), ' - ', parameters('formattedTimeNow'))]",
         "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"## Palo Alto Prisma Cloud Overview\\n---\\n**NOTE**: This workbook depends on a parser based on a Kusto Function to work as expected [**PaloAltoPrismaCloud**](https://aka.ms/sentinel-PaloAltoPrismaCloud-parser) which is deployed with the Azure Sentinel Solution.\"},\"name\":\"text - 2\"},{\"type\":9,\"content\":{\"version\":\"KqlParameterItem/1.0\",\"parameters\":[{\"id\":\"600df9d4-1fb8-4255-a77e-27f5d12a5097\",\"version\":\"KqlParameterItem/1.0\",\"name\":\"TimeRange\",\"type\":4,\"value\":{\"durationMs\":2592000000},\"typeSettings\":{\"selectableValues\":[{\"durationMs\":3600000},{\"durationMs\":43200000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000},{\"durationMs\":7776000000}]},\"timeContext\":{\"durationMs\":86400000}}],\"style\":\"pills\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"name\":\"parameters - 2\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\n| make-series TotalEvents = count() default = 0 on TimeGenerated from {TimeRange:start} to {TimeRange:end} step {TimeRange:grain};\",\"size\":0,\"title\":\"Events over time\",\"color\":\"grayBlue\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"areachart\",\"tileSettings\":{\"showBorder\":false}},\"customWidth\":\"50\",\"name\":\"query - 2\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| where isnotempty(ResourceRegion)\\r\\n| summarize count() by ResourceRegion\",\"size\":3,\"title\":\"Events by Region\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"50\",\"name\":\"query - 0\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| where isnotempty(ResourceCloudType)\\r\\n| summarize count() by ResourceCloudType\",\"size\":3,\"title\":\"Events by Cloud type\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"50\",\"name\":\"query - 1\"}]},\"customWidth\":\"50\",\"name\":\"group - 3\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| summarize Low = countif(AlertSeverity =~ \\\"low\\\"), Medium = countif(AlertSeverity == \\\"medium\\\"), High = countif(AlertSeverity == \\\"high\\\") by bin_at(TimeGenerated, 1h, now())\",\"size\":0,\"title\":\"Alerts over time\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"scatterchart\",\"chartSettings\":{\"seriesLabelSettings\":[{\"seriesName\":\"Low\",\"color\":\"yellow\"},{\"seriesName\":\"Medium\",\"color\":\"orange\"},{\"seriesName\":\"High\",\"color\":\"redBright\"}]}},\"customWidth\":\"55\",\"name\":\"query - 0\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| where Status =~ 'open'\\r\\n| project AlertId, AlertSeverity, AlertMessage\",\"size\":0,\"title\":\"Open Alerts\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"gridSettings\":{\"filter\":true}},\"customWidth\":\"40\",\"name\":\"query - 2\",\"styleSettings\":{\"margin\":\"20px\"}}]},\"name\":\"group - 4\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| where isnotempty(SrcIpAddr)\\r\\n| summarize count() by SrcIpAddr\\r\\n| top 10 by count_ desc\",\"size\":3,\"title\":\"Top Sources\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"30\",\"name\":\"query - 0\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"let u1 = PaloAltoPrismaCloud\\r\\n| where isnotempty(PolicyLastModifiedBy)\\r\\n| project User = PolicyLastModifiedBy;\\r\\nlet u2 = PaloAltoPrismaCloud\\r\\n| where isnotempty(UserName)\\r\\n| project User = UserName;\\r\\nlet users = union u1, u2;\\r\\nusers\\r\\n| summarize Actions = count() by User\\r\\n| top 10 by Actions desc\\r\\n\\r\\n\",\"size\":3,\"title\":\"Top Users\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"gridSettings\":{\"formatters\":[{\"columnMatch\":\"Actions\",\"formatter\":4,\"formatOptions\":{\"palette\":\"blue\"}}]}},\"customWidth\":\"30\",\"name\":\"query - 1\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| where ResourceType =~ 'Login'\\r\\n| extend TimeFromNow = now() - TimeGenerated\\r\\n| extend TimeAgo = strcat(case(TimeFromNow < 2m, strcat(toint(TimeFromNow / 1m), ' seconds'), TimeFromNow < 2h, strcat(toint(TimeFromNow / 1m), ' minutes'), TimeFromNow < 2d, strcat(toint(TimeFromNow / 1h), ' hours'), strcat(toint(TimeFromNow / 1d), ' days')), ' ago')\\r\\n| project User= UserName, ['Source IP'] = SrcIpAddr, ['Login Result'] = strcat(iff(EventResult == 'Success', '', ''), ' ', EventResult), ['Login Time'] = TimeAgo\",\"size\":0,\"title\":\"User Logins\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"gridSettings\":{\"filter\":true}},\"customWidth\":\"35\",\"name\":\"query - 2\"}]},\"name\":\"group - 5\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PaloAltoPrismaCloud\\r\\n| where isnotempty(AlertMessage)\\r\\n| top 10 by TimeGenerated desc\\r\\n| extend NumSeverity = case(AlertSeverity =~ 'low', 1, AlertSeverity =~ 'medium', 2, 3)\\r\\n| project ['Alert Time'] = TimeGenerated, ['Alert Message'] = AlertMessage, ['Severity'] = NumSeverity, ResourceRegionId, ResourceId\",\"size\":0,\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"gridSettings\":{\"formatters\":[{\"columnMatch\":\"Severity\",\"formatter\":8,\"formatOptions\":{\"min\":1,\"max\":3,\"palette\":\"orangeRed\"},\"numberFormat\":{\"unit\":0,\"options\":{\"style\":\"decimal\",\"useGrouping\":false}}}]}},\"name\":\"query - 6\"}],\"fromTemplateId\":\"sentinel-PaloAltoPrismaCloudWorkbook\",\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}\r\n",
         "version": "1.0",
-        "sourceId": "[variables('_workbook-source')]",
+        "sourceId": "[variables('workspaceResourceId')]",
         "category": "sentinel"
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic1-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic1-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects access keys which were not rotated for 90 days.",
         "displayName": "Palo Alto Prisma Cloud - Access keys are not rotated for 90 days",
@@ -205,11 +212,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic2-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic2-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects network ACLs with outbound rule to allow all traffic.",
         "displayName": "Palo Alto Prisma Cloud - Network ACL allow all outbound traffic",
@@ -228,11 +238,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic3-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic3-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects Network ACLs allow ingress traffic to server administration ports.",
         "displayName": "Palo Alto Prisma Cloud - Network ACL allow ingress traffic to server administration ports",
@@ -251,11 +264,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic4-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic4-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects Network ACLs with Inbound rule to allow All Traffic.",
         "displayName": "Palo Alto Prisma Cloud - Network ACLs Inbound rule to allow All Traffic",
@@ -274,11 +290,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic5-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic5-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects anomalous API key usage activity.",
         "displayName": "Palo Alto Prisma Cloud - Anomalous access key usage",
@@ -297,11 +316,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic6-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic6-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects alerts with high risk score value.",
         "displayName": "Palo Alto Prisma Cloud - High risk score alert",
@@ -320,11 +342,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic7-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic7-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects high severity alert which is opened for several days.",
         "displayName": "Palo Alto Prisma Cloud - High severity alert opened for several days",
@@ -343,11 +368,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic8-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic8-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects IAM Groups with Administrator Access Permissions.",
         "displayName": "Palo Alto Prisma Cloud - IAM Group with Administrator Access Permissions",
@@ -366,11 +394,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic9-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic9-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects users inactive for 30 days.",
         "displayName": "Palo Alto Prisma Cloud - Inactive user",
@@ -389,11 +420,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic10-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic10-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects alerts with maximum risk score value.",
         "displayName": "Palo Alto Prisma Cloud - Maximum risk score alert",
@@ -412,11 +446,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic11-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic11-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects multiple failed logins for the same user account.",
         "displayName": "Palo Alto Prisma Cloud - Multiple failed logins for user",
@@ -435,260 +472,255 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces",
-      "apiVersion": "2020-08-01",
-      "name": "[parameters('workspace')]",
-      "location": "[parameters('workspace-location')]",
-      "resources": [
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "PaloAltoPrismaCloud",
-            "category": "SecureHats",
-            "functionAlias": "PaloAltoPrismaCloud",
-            "query": "\nlet Audit_view = view () { \r\n    PaloAltoPrismaCloudAudit_CL\r\n    | extend \r\n        EventType='PaloAltoPrismaCloudAudit',\r\n        user=iff(isnotempty(column_ifexists('user_s', '')), column_ifexists('user_s', ''), column_ifexists('user_g', '')),\r\n        resourceName=iff(isnotempty(column_ifexists('resourceName_s', '')), column_ifexists('resourceName_s', ''), column_ifexists('resourceName_g', '')),\r\n        timestamp_d=column_ifexists('timestamp_d', ''),\r\n        IPAddress=column_ifexists('IPAddress', ''),\r\n        ResourceType=column_ifexists('ResourceType', ''),\r\n        action_s=column_ifexists('action_s', ''),\r\n        result_s=column_ifexists('result_s', '')\r\n    | project-rename  \r\n        UserName=user,\r\n        ResourceName=resourceName,\r\n        EventEndTime=timestamp_d,\r\n        SrcIpAddr=IPAddress,\r\n        EventMessage=action_s,\r\n        EventResult=result_s\r\n    | project-away\r\n        user_g,\r\n        user_s,\r\n        resourceName_s,\r\n        resourceName_g\r\n};\r\nlet Alert_view = view () { \r\n    PaloAltoPrismaCloudAlert_CL\r\n    | extend \r\n        EventType='PaloAltoPrismaCloudAlert',\r\n        reason_s=column_ifexists('reason_s', ''),\r\n        policy_name_s=column_ifexists('policy_name_s', ''),\r\n        policy_description_s=column_ifexists('policy_description_s', ''),\r\n        policy_severity_s=column_ifexists('policy_severity_s', ''),\r\n        policy_recommendation_s=column_ifexists('policy_recommendation_s', ''),\r\n        policy_labels_s=column_ifexists('policy_labels_s', ''),\r\n        policy_lastModifiedOn_d=column_ifexists('policy_lastModifiedOn_d', ''),\r\n        policy_lastModifiedBy_s=column_ifexists('policy_lastModifiedBy_s', ''),\r\n        policy_deleted_b=column_ifexists('policy_deleted_b', ''),\r\n        policy_remediation_description_s=column_ifexists('policy_remediation_description_s', ''),\r\n        policy_remediation_impact_s=column_ifexists('policy_remediation_impact_s', ''),\r\n        policy_remediation_cliScriptTemplate_s=column_ifexists('policy_remediation_cliScriptTemplate_s', ''),\r\n        history_s=column_ifexists('history_s', ''),\r\n        resource_data_mfa_active_b=column_ifexists('resource_data_mfa_active_b', ''),\r\n        resource_data_cert_1_active_b=column_ifexists('resource_data_cert_1_active_b', ''),\r\n        resource_data_cert_2_active_b=column_ifexists('resource_data_cert_2_active_b', ''),\r\n        resource_data_password_enabled_s=column_ifexists('resource_data_password_enabled_s', ''),\r\n        resource_data_password_last_used_s=column_ifexists('resource_data_password_last_used_s', ''),\r\n        resource_data_user_creation_time_t=column_ifexists('resource_data_user_creation_time_t', ''),\r\n        resource_data_access_key_1_active_b=column_ifexists('resource_data_access_key_1_active_b', ''),\r\n        resource_data_access_key_2_active_b=column_ifexists('resource_data_access_key_2_active_b', ''),\r\n        resource_data_cert_1_last_rotated_s=column_ifexists('resource_data_cert_1_last_rotated_s', ''),\r\n        resource_data_cert_2_last_rotated_s=column_ifexists('resource_data_cert_2_last_rotated_s', ''),\r\n        resource_data_password_last_changed_s=column_ifexists('resource_data_password_last_changed_s', ''),\r\n        resource_data_password_next_rotation_s=column_ifexists('resource_data_password_next_rotation_s', ''),\r\n        resource_data_access_key_1_last_rotated_t=column_ifexists('resource_data_access_key_1_last_rotated_t', ''),\r\n        resource_data_access_key_2_last_rotated_s=column_ifexists('resource_data_access_key_2_last_rotated_s', ''),\r\n        resource_data_access_key_1_last_used_date_t=column_ifexists('resource_data_access_key_1_last_used_date_t', ''),\r\n        resource_data_access_key_2_last_used_date_s=column_ifexists('resource_data_access_key_2_last_used_date_s', ''),\r\n        resource_data_access_key_1_last_used_region_s=column_ifexists('resource_data_access_key_1_last_used_region_s', ''),\r\n        resource_data_access_key_2_last_used_region_s=column_ifexists('resource_data_access_key_2_last_used_region_s', ''),\r\n        resource_data_access_key_1_last_used_service_s=column_ifexists('resource_data_access_key_1_last_used_service_s', ''),\r\n        resource_data_access_key_2_last_used_service_s=column_ifexists('resource_data_access_key_2_last_used_service_s', ''),\r\n        resource_rrn_s=column_ifexists('resource_rrn_s', ''),\r\n        resource_name_s=column_ifexists('resource_name_s', ''),\r\n        resource_account_s=column_ifexists('resource_account_s', ''),\r\n        resource_accountId_s=column_ifexists('resource_accountId_s', ''),\r\n        resource_cloudAccountGroups_s=column_ifexists('resource_cloudAccountGroups_s', ''),\r\n        resource_region_s=column_ifexists('resource_region_s', ''),\r\n        resource_regionId_s=column_ifexists('resource_regionId_s', ''),\r\n        resource_resourceType_s=column_ifexists('resource_resourceType_s', ''),\r\n        resource_resourceApiName_s=column_ifexists('resource_resourceApiName_s', ''),\r\n        resource_url_s=column_ifexists('resource_url_s', ''),\r\n        resource_data_arn_s=column_ifexists('resource_data_arn_s', ''),\r\n        resource_data_user_s=column_ifexists('resource_data_user_s', ''),\r\n        resource_additionalInfo_accessKeyAge_s=column_ifexists('resource_additionalInfo_accessKeyAge_s', ''),\r\n        resource_additionalInfo_inactiveSinceTs_s=column_ifexists('resource_additionalInfo_inactiveSinceTs_s', ''),\r\n        resource_cloudType_s=column_ifexists('resource_cloudType_s', ''),\r\n        resource_resourceTs_d=column_ifexists('resource_resourceTs_d', ''),\r\n        id_s=column_ifexists('id_s', ''),\r\n        policy_policyId_g=column_ifexists('policy_policyId_g', ''),\r\n        policy_policyType_s=column_ifexists('policy_policyType_s', ''),\r\n        policy_systemDefault_b=column_ifexists('policy_systemDefault_b', ''),\r\n        policy_remediable_b=column_ifexists('policy_remediable_b', ''),\r\n        alertRules_s=column_ifexists('alertRules_s', ''),\r\n        riskDetail_riskScore_score_d=column_ifexists('riskDetail_riskScore_score_d', ''),\r\n        riskDetail_riskScore_maxScore_d=column_ifexists('riskDetail_riskScore_maxScore_d', ''),\r\n        riskDetail_rating_s=column_ifexists('riskDetail_rating_s', ''),\r\n        riskDetail_score_s=column_ifexists('riskDetail_score_s', ''),\r\n        status_s=column_ifexists('status_s', ''),\r\n        firstSeen_d=column_ifexists('firstSeen_d', ''),\r\n        lastSeen_d=column_ifexists('lastSeen_d', ''),\r\n        alertTime_d=column_ifexists('alertTime_d', ''),\r\n        resource_id=iff(isnotempty(column_ifexists('resource_id_s', '')), column_ifexists('resource_id_s', ''), column_ifexists('resource_id_g', ''))\r\n    | project-rename\r\n        Reason=reason_s,\r\n        AlertMessage=policy_name_s,\r\n        AlertDescription=policy_description_s,\r\n        AlertSeverity=policy_severity_s,\r\n        PolicyRecommendation=policy_recommendation_s,\r\n        PolicyLabels=policy_labels_s,\r\n        PolicyLastModifiedOn=policy_lastModifiedOn_d,\r\n        PolicyLastModifiedBy=policy_lastModifiedBy_s,\r\n        PolicyDeleted=policy_deleted_b,\r\n        PolicyRemediationDescription=policy_remediation_description_s,\r\n        PolicyRemediationImpact=policy_remediation_impact_s,\r\n        PolicyRemediationCliScriptTemplate=policy_remediation_cliScriptTemplate_s,\r\n        ResourceId=resource_id,\r\n        History=history_s,\r\n        ResourceDataMfaActive=resource_data_mfa_active_b,\r\n        ResourceDataCert1Active=resource_data_cert_1_active_b,\r\n        ResourceDataCert2Active=resource_data_cert_2_active_b,\r\n        ResourceDataPasswordEnabled=resource_data_password_enabled_s,\r\n        ResourceDataPasswordLastUsed=resource_data_password_last_used_s,\r\n        ResourceDataUserCreationTime=resource_data_user_creation_time_t,\r\n        ResourceDataAccessKey1Active=resource_data_access_key_1_active_b,\r\n        ResourceDataAccessKey2Active=resource_data_access_key_2_active_b,\r\n        ResourceDataCert1LastRotated=resource_data_cert_1_last_rotated_s,\r\n        ResourceDataCert2LastRotated=resource_data_cert_2_last_rotated_s,\r\n        ResourceDataPasswordLastChanged=resource_data_password_last_changed_s,\r\n        ResourceDataPasswordNextRotation=resource_data_password_next_rotation_s,\r\n        ResourceDataAccessKey1LastRotated=resource_data_access_key_1_last_rotated_t,\r\n        ResourceDataAccessKey2LastRotated=resource_data_access_key_2_last_rotated_s,\r\n        ResourceDataAccessKey1LastUsedDate=resource_data_access_key_1_last_used_date_t,\r\n        ResourceDataAccessKey2LastUsedDate=resource_data_access_key_2_last_used_date_s,\r\n        ResourceDataAccessKey1LastUsedRegion=resource_data_access_key_1_last_used_region_s,\r\n        ResourceDataAccessKey2LastUsedRegion=resource_data_access_key_2_last_used_region_s,\r\n        ResourceDataAccessKey1LastUsedService=resource_data_access_key_1_last_used_service_s,\r\n        ResourceDataAccessKey2LastUsedService=resource_data_access_key_2_last_used_service_s,\r\n        ResourceRrn=resource_rrn_s,\r\n        ResourceName=resource_name_s,\r\n        ResourceAccount=resource_account_s,\r\n        ResourceAccountId=resource_accountId_s,\r\n        ResourceCloudAccountGroups=resource_cloudAccountGroups_s,\r\n        ResourceRegion=resource_region_s,\r\n        ResourceRegionId=resource_regionId_s,\r\n        ResourceResourceType=resource_resourceType_s,\r\n        ResourceResourceApiName=resource_resourceApiName_s,\r\n        ResourceUrl=resource_url_s,\r\n        ResourceDataArn=resource_data_arn_s,\r\n        ResourceDataUser=resource_data_user_s,\r\n        ResourceAdditionalInfoAccessKeyAge=resource_additionalInfo_accessKeyAge_s,\r\n        ResourceAdditionalInfoInactiveSinceTs=resource_additionalInfo_inactiveSinceTs_s,\r\n        ResourceCloudType=resource_cloudType_s,\r\n        ResourceResourceTs=resource_resourceTs_d,\r\n        AlertId=id_s,\r\n        PolicyPolicyId=policy_policyId_g,\r\n        PolicyPolicyType=policy_policyType_s,\r\n        PolicySystemDefault=policy_systemDefault_b,\r\n        PolicyRemediable=policy_remediable_b,\r\n        AlertRules=alertRules_s,\r\n        RiskDetailRiskScoreScore=riskDetail_riskScore_score_d,\r\n        RiskDetailRiskScoreMaxScore=riskDetail_riskScore_maxScore_d,\r\n        RiskDetailRating=riskDetail_rating_s,\r\n        RiskDetailScore=riskDetail_score_s,\r\n        Status=status_s,\r\n        FirstSeen=firstSeen_d,\r\n        LastSeen=lastSeen_d,\r\n        AlertTime=alertTime_d\r\n    | project-away\r\n        resource_id_s,\r\n        resource_id_g\r\n};\r\nunion isfuzzy=true Alert_view, Audit_view",
-            "version": 1
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 1",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - Access keys used",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(30d)\n| where ResourceType =~ 'Login'\n| where EventMessage has 'access key'\n| summarize by UserName, SrcIpAddr\n| extend IPCustomEntity = SrcIpAddr\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for access keys used for programmatic access."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 2",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - Top sources of failed logins",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| summarize count() by SrcIpAddr\n| order by count_ desc\n| extend IPCustomEntity = SrcIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for top source IP addresses of failed logins."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 3",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - Top users by failed logins",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| summarize count() by UserName\n| order by count_ desc\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for users who have large number of failed logins."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 4",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - High risk score opened alerts",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| where Status =~ 'open'\n| extend r_score = 0.85 * toint(RiskDetailRiskScoreMaxScore)\n| extend i_RiskDetailRiskScoreScore = toint(RiskDetailRiskScoreScore)\n| where i_RiskDetailRiskScoreScore > r_score\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for alerts with high risk score value."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 5",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - High severity alerts",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| where AlertSeverity =~ 'high'\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for high severity alerts."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 6",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - New users",
-            "category": "Hunting Queries",
-            "query": "let known_users = \nPaloAltoPrismaCloud\n| where TimeGenerated between (ago(30d) .. (1d))\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| summarize makeset(UserName);\nPaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| where UserName !in (known_users)\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for new users."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 7",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - Opened alerts",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| where Status =~ 'open'\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches opened alerts."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 8",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - Top recources with alerts",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| summarize count() by ResourceName\n| order by count_ desc\n| extend AccountCustomEntity = ResourceName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches for resources which appeared in different alerts."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "PaloAltoPrismaCloud Hunting Query 9",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Palo Alto Prisma Cloud - Updated resources",
-            "category": "Hunting Queries",
-            "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'RESOURCE_UPDATED'\n| extend AccountCustomEntity = UserName\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query searches recently updated resources."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        }
-      ]
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "PaloAltoPrismaCloud",
+        "category": "SecureHats",
+        "functionAlias": "PaloAltoPrismaCloud",
+        "query": "\nlet Audit_view = view () { \r\n    PaloAltoPrismaCloudAudit_CL\r\n    | extend \r\n        EventType='PaloAltoPrismaCloudAudit',\r\n        user=iff(isnotempty(column_ifexists('user_s', '')), column_ifexists('user_s', ''), column_ifexists('user_g', '')),\r\n        resourceName=iff(isnotempty(column_ifexists('resourceName_s', '')), column_ifexists('resourceName_s', ''), column_ifexists('resourceName_g', '')),\r\n        timestamp_d=column_ifexists('timestamp_d', ''),\r\n        IPAddress=column_ifexists('IPAddress', ''),\r\n        ResourceType=column_ifexists('ResourceType', ''),\r\n        action_s=column_ifexists('action_s', ''),\r\n        result_s=column_ifexists('result_s', '')\r\n    | project-rename  \r\n        UserName=user,\r\n        ResourceName=resourceName,\r\n        EventEndTime=timestamp_d,\r\n        SrcIpAddr=IPAddress,\r\n        EventMessage=action_s,\r\n        EventResult=result_s\r\n    | project-away\r\n        user_g,\r\n        user_s,\r\n        resourceName_s,\r\n        resourceName_g\r\n};\r\nlet Alert_view = view () { \r\n    PaloAltoPrismaCloudAlert_CL\r\n    | extend \r\n        EventType='PaloAltoPrismaCloudAlert',\r\n        reason_s=column_ifexists('reason_s', ''),\r\n        policy_name_s=column_ifexists('policy_name_s', ''),\r\n        policy_description_s=column_ifexists('policy_description_s', ''),\r\n        policy_severity_s=column_ifexists('policy_severity_s', ''),\r\n        policy_recommendation_s=column_ifexists('policy_recommendation_s', ''),\r\n        policy_labels_s=column_ifexists('policy_labels_s', ''),\r\n        policy_lastModifiedOn_d=column_ifexists('policy_lastModifiedOn_d', ''),\r\n        policy_lastModifiedBy_s=column_ifexists('policy_lastModifiedBy_s', ''),\r\n        policy_deleted_b=column_ifexists('policy_deleted_b', ''),\r\n        policy_remediation_description_s=column_ifexists('policy_remediation_description_s', ''),\r\n        policy_remediation_impact_s=column_ifexists('policy_remediation_impact_s', ''),\r\n        policy_remediation_cliScriptTemplate_s=column_ifexists('policy_remediation_cliScriptTemplate_s', ''),\r\n        history_s=column_ifexists('history_s', ''),\r\n        resource_data_mfa_active_b=column_ifexists('resource_data_mfa_active_b', ''),\r\n        resource_data_cert_1_active_b=column_ifexists('resource_data_cert_1_active_b', ''),\r\n        resource_data_cert_2_active_b=column_ifexists('resource_data_cert_2_active_b', ''),\r\n        resource_data_password_enabled_s=column_ifexists('resource_data_password_enabled_s', ''),\r\n        resource_data_password_last_used_s=column_ifexists('resource_data_password_last_used_s', ''),\r\n        resource_data_user_creation_time_t=column_ifexists('resource_data_user_creation_time_t', ''),\r\n        resource_data_access_key_1_active_b=column_ifexists('resource_data_access_key_1_active_b', ''),\r\n        resource_data_access_key_2_active_b=column_ifexists('resource_data_access_key_2_active_b', ''),\r\n        resource_data_cert_1_last_rotated_s=column_ifexists('resource_data_cert_1_last_rotated_s', ''),\r\n        resource_data_cert_2_last_rotated_s=column_ifexists('resource_data_cert_2_last_rotated_s', ''),\r\n        resource_data_password_last_changed_s=column_ifexists('resource_data_password_last_changed_s', ''),\r\n        resource_data_password_next_rotation_s=column_ifexists('resource_data_password_next_rotation_s', ''),\r\n        resource_data_access_key_1_last_rotated_t=column_ifexists('resource_data_access_key_1_last_rotated_t', ''),\r\n        resource_data_access_key_2_last_rotated_s=column_ifexists('resource_data_access_key_2_last_rotated_s', ''),\r\n        resource_data_access_key_1_last_used_date_t=column_ifexists('resource_data_access_key_1_last_used_date_t', ''),\r\n        resource_data_access_key_2_last_used_date_s=column_ifexists('resource_data_access_key_2_last_used_date_s', ''),\r\n        resource_data_access_key_1_last_used_region_s=column_ifexists('resource_data_access_key_1_last_used_region_s', ''),\r\n        resource_data_access_key_2_last_used_region_s=column_ifexists('resource_data_access_key_2_last_used_region_s', ''),\r\n        resource_data_access_key_1_last_used_service_s=column_ifexists('resource_data_access_key_1_last_used_service_s', ''),\r\n        resource_data_access_key_2_last_used_service_s=column_ifexists('resource_data_access_key_2_last_used_service_s', ''),\r\n        resource_rrn_s=column_ifexists('resource_rrn_s', ''),\r\n        resource_name_s=column_ifexists('resource_name_s', ''),\r\n        resource_account_s=column_ifexists('resource_account_s', ''),\r\n        resource_accountId_s=column_ifexists('resource_accountId_s', ''),\r\n        resource_cloudAccountGroups_s=column_ifexists('resource_cloudAccountGroups_s', ''),\r\n        resource_region_s=column_ifexists('resource_region_s', ''),\r\n        resource_regionId_s=column_ifexists('resource_regionId_s', ''),\r\n        resource_resourceType_s=column_ifexists('resource_resourceType_s', ''),\r\n        resource_resourceApiName_s=column_ifexists('resource_resourceApiName_s', ''),\r\n        resource_url_s=column_ifexists('resource_url_s', ''),\r\n        resource_data_arn_s=column_ifexists('resource_data_arn_s', ''),\r\n        resource_data_user_s=column_ifexists('resource_data_user_s', ''),\r\n        resource_additionalInfo_accessKeyAge_s=column_ifexists('resource_additionalInfo_accessKeyAge_s', ''),\r\n        resource_additionalInfo_inactiveSinceTs_s=column_ifexists('resource_additionalInfo_inactiveSinceTs_s', ''),\r\n        resource_cloudType_s=column_ifexists('resource_cloudType_s', ''),\r\n        resource_resourceTs_d=column_ifexists('resource_resourceTs_d', ''),\r\n        id_s=column_ifexists('id_s', ''),\r\n        policy_policyId_g=column_ifexists('policy_policyId_g', ''),\r\n        policy_policyType_s=column_ifexists('policy_policyType_s', ''),\r\n        policy_systemDefault_b=column_ifexists('policy_systemDefault_b', ''),\r\n        policy_remediable_b=column_ifexists('policy_remediable_b', ''),\r\n        alertRules_s=column_ifexists('alertRules_s', ''),\r\n        riskDetail_riskScore_score_d=column_ifexists('riskDetail_riskScore_score_d', ''),\r\n        riskDetail_riskScore_maxScore_d=column_ifexists('riskDetail_riskScore_maxScore_d', ''),\r\n        riskDetail_rating_s=column_ifexists('riskDetail_rating_s', ''),\r\n        riskDetail_score_s=column_ifexists('riskDetail_score_s', ''),\r\n        status_s=column_ifexists('status_s', ''),\r\n        firstSeen_d=column_ifexists('firstSeen_d', ''),\r\n        lastSeen_d=column_ifexists('lastSeen_d', ''),\r\n        alertTime_d=column_ifexists('alertTime_d', ''),\r\n        resource_id=iff(isnotempty(column_ifexists('resource_id_s', '')), column_ifexists('resource_id_s', ''), column_ifexists('resource_id_g', ''))\r\n    | project-rename\r\n        Reason=reason_s,\r\n        AlertMessage=policy_name_s,\r\n        AlertDescription=policy_description_s,\r\n        AlertSeverity=policy_severity_s,\r\n        PolicyRecommendation=policy_recommendation_s,\r\n        PolicyLabels=policy_labels_s,\r\n        PolicyLastModifiedOn=policy_lastModifiedOn_d,\r\n        PolicyLastModifiedBy=policy_lastModifiedBy_s,\r\n        PolicyDeleted=policy_deleted_b,\r\n        PolicyRemediationDescription=policy_remediation_description_s,\r\n        PolicyRemediationImpact=policy_remediation_impact_s,\r\n        PolicyRemediationCliScriptTemplate=policy_remediation_cliScriptTemplate_s,\r\n        ResourceId=resource_id,\r\n        History=history_s,\r\n        ResourceDataMfaActive=resource_data_mfa_active_b,\r\n        ResourceDataCert1Active=resource_data_cert_1_active_b,\r\n        ResourceDataCert2Active=resource_data_cert_2_active_b,\r\n        ResourceDataPasswordEnabled=resource_data_password_enabled_s,\r\n        ResourceDataPasswordLastUsed=resource_data_password_last_used_s,\r\n        ResourceDataUserCreationTime=resource_data_user_creation_time_t,\r\n        ResourceDataAccessKey1Active=resource_data_access_key_1_active_b,\r\n        ResourceDataAccessKey2Active=resource_data_access_key_2_active_b,\r\n        ResourceDataCert1LastRotated=resource_data_cert_1_last_rotated_s,\r\n        ResourceDataCert2LastRotated=resource_data_cert_2_last_rotated_s,\r\n        ResourceDataPasswordLastChanged=resource_data_password_last_changed_s,\r\n        ResourceDataPasswordNextRotation=resource_data_password_next_rotation_s,\r\n        ResourceDataAccessKey1LastRotated=resource_data_access_key_1_last_rotated_t,\r\n        ResourceDataAccessKey2LastRotated=resource_data_access_key_2_last_rotated_s,\r\n        ResourceDataAccessKey1LastUsedDate=resource_data_access_key_1_last_used_date_t,\r\n        ResourceDataAccessKey2LastUsedDate=resource_data_access_key_2_last_used_date_s,\r\n        ResourceDataAccessKey1LastUsedRegion=resource_data_access_key_1_last_used_region_s,\r\n        ResourceDataAccessKey2LastUsedRegion=resource_data_access_key_2_last_used_region_s,\r\n        ResourceDataAccessKey1LastUsedService=resource_data_access_key_1_last_used_service_s,\r\n        ResourceDataAccessKey2LastUsedService=resource_data_access_key_2_last_used_service_s,\r\n        ResourceRrn=resource_rrn_s,\r\n        ResourceName=resource_name_s,\r\n        ResourceAccount=resource_account_s,\r\n        ResourceAccountId=resource_accountId_s,\r\n        ResourceCloudAccountGroups=resource_cloudAccountGroups_s,\r\n        ResourceRegion=resource_region_s,\r\n        ResourceRegionId=resource_regionId_s,\r\n        ResourceResourceType=resource_resourceType_s,\r\n        ResourceResourceApiName=resource_resourceApiName_s,\r\n        ResourceUrl=resource_url_s,\r\n        ResourceDataArn=resource_data_arn_s,\r\n        ResourceDataUser=resource_data_user_s,\r\n        ResourceAdditionalInfoAccessKeyAge=resource_additionalInfo_accessKeyAge_s,\r\n        ResourceAdditionalInfoInactiveSinceTs=resource_additionalInfo_inactiveSinceTs_s,\r\n        ResourceCloudType=resource_cloudType_s,\r\n        ResourceResourceTs=resource_resourceTs_d,\r\n        AlertId=id_s,\r\n        PolicyPolicyId=policy_policyId_g,\r\n        PolicyPolicyType=policy_policyType_s,\r\n        PolicySystemDefault=policy_systemDefault_b,\r\n        PolicyRemediable=policy_remediable_b,\r\n        AlertRules=alertRules_s,\r\n        RiskDetailRiskScoreScore=riskDetail_riskScore_score_d,\r\n        RiskDetailRiskScoreMaxScore=riskDetail_riskScore_maxScore_d,\r\n        RiskDetailRating=riskDetail_rating_s,\r\n        RiskDetailScore=riskDetail_score_s,\r\n        Status=status_s,\r\n        FirstSeen=firstSeen_d,\r\n        LastSeen=lastSeen_d,\r\n        AlertTime=alertTime_d\r\n    | project-away\r\n        resource_id_s,\r\n        resource_id_g\r\n};\r\nlet Alert_view = view () { \r\n    PaloAltoPrismaCloudAlert_CL\r\n    | extend \r\n        EventType='PaloAltoPrismaCloudAlert',\r\n        reason_s=column_ifexists('reason_s', ''),\r\n        policy_name_s=column_ifexists('policy_name_s', ''),\r\n        policy_description_s=column_ifexists('policy_description_s', ''),\r\n        policy_severity_s=column_ifexists('policy_severity_s', ''),\r\n        policy_recommendation_s=column_ifexists('policy_recommendation_s', ''),\r\n        policy_labels_s=column_ifexists('policy_labels_s', ''),\r\n        policy_lastModifiedOn_d=column_ifexists('policy_lastModifiedOn_d', ''),\r\n        policy_lastModifiedBy_s=column_ifexists('policy_lastModifiedBy_s', ''),\r\n        policy_deleted_b=column_ifexists('policy_deleted_b', ''),\r\n        policy_remediation_description_s=column_ifexists('policy_remediation_description_s', ''),\r\n        policy_remediation_impact_s=column_ifexists('policy_remediation_impact_s', ''),\r\n        policy_remediation_cliScriptTemplate_s=column_ifexists('policy_remediation_cliScriptTemplate_s', ''),\r\n        history_s=column_ifexists('history_s', ''),\r\n        resource_data_mfa_active_b=column_ifexists('resource_data_mfa_active_b', ''),\r\n        resource_data_cert_1_active_b=column_ifexists('resource_data_cert_1_active_b', ''),\r\n        resource_data_cert_2_active_b=column_ifexists('resource_data_cert_2_active_b', ''),\r\n        resource_data_password_enabled_s=column_ifexists('resource_data_password_enabled_s', ''),\r\n        resource_data_password_last_used_s=column_ifexists('resource_data_password_last_used_s', ''),\r\n        resource_data_user_creation_time_t=column_ifexists('resource_data_user_creation_time_t', ''),\r\n        resource_data_access_key_1_active_b=column_ifexists('resource_data_access_key_1_active_b', ''),\r\n        resource_data_access_key_2_active_b=column_ifexists('resource_data_access_key_2_active_b', ''),\r\n        resource_data_cert_1_last_rotated_s=column_ifexists('resource_data_cert_1_last_rotated_s', ''),\r\n        resource_data_cert_2_last_rotated_s=column_ifexists('resource_data_cert_2_last_rotated_s', ''),\r\n        resource_data_password_last_changed_s=column_ifexists('resource_data_password_last_changed_s', ''),\r\n        resource_data_password_next_rotation_s=column_ifexists('resource_data_password_next_rotation_s', ''),\r\n        resource_data_access_key_1_last_rotated_t=column_ifexists('resource_data_access_key_1_last_rotated_t', ''),\r\n        resource_data_access_key_2_last_rotated_s=column_ifexists('resource_data_access_key_2_last_rotated_s', ''),\r\n        resource_data_access_key_1_last_used_date_t=column_ifexists('resource_data_access_key_1_last_used_date_t', ''),\r\n        resource_data_access_key_2_last_used_date_s=column_ifexists('resource_data_access_key_2_last_used_date_s', ''),\r\n        resource_data_access_key_1_last_used_region_s=column_ifexists('resource_data_access_key_1_last_used_region_s', ''),\r\n        resource_data_access_key_2_last_used_region_s=column_ifexists('resource_data_access_key_2_last_used_region_s', ''),\r\n        resource_data_access_key_1_last_used_service_s=column_ifexists('resource_data_access_key_1_last_used_service_s', ''),\r\n        resource_data_access_key_2_last_used_service_s=column_ifexists('resource_data_access_key_2_last_used_service_s', ''),\r\n        resource_rrn_s=column_ifexists('resource_rrn_s', ''),\r\n        resource_name_s=column_ifexists('resource_name_s', ''),\r\n        resource_account_s=column_ifexists('resource_account_s', ''),\r\n        resource_accountId_s=column_ifexists('resource_accountId_s', ''),\r\n        resource_cloudAccountGroups_s=column_ifexists('resource_cloudAccountGroups_s', ''),\r\n        resource_region_s=column_ifexists('resource_region_s', ''),\r\n        resource_regionId_s=column_ifexists('resource_regionId_s', ''),\r\n        resource_resourceType_s=column_ifexists('resource_resourceType_s', ''),\r\n        resource_resourceApiName_s=column_ifexists('resource_resourceApiName_s', ''),\r\n        resource_url_s=column_ifexists('resource_url_s', ''),\r\n        resource_data_arn_s=column_ifexists('resource_data_arn_s', ''),\r\n        resource_data_user_s=column_ifexists('resource_data_user_s', ''),\r\n        resource_additionalInfo_accessKeyAge_s=column_ifexists('resource_additionalInfo_accessKeyAge_s', ''),\r\n        resource_additionalInfo_inactiveSinceTs_s=column_ifexists('resource_additionalInfo_inactiveSinceTs_s', ''),\r\n        resource_cloudType_s=column_ifexists('resource_cloudType_s', ''),\r\n        resource_resourceTs_d=column_ifexists('resource_resourceTs_d', ''),\r\n        id_s=column_ifexists('id_s', ''),\r\n        policy_policyId_g=column_ifexists('policy_policyId_g', ''),\r\n        policy_policyType_s=column_ifexists('policy_policyType_s', ''),\r\n        policy_systemDefault_b=column_ifexists('policy_systemDefault_b', ''),\r\n        policy_remediable_b=column_ifexists('policy_remediable_b', ''),\r\n        alertRules_s=column_ifexists('alertRules_s', ''),\r\n        riskDetail_riskScore_score_d=column_ifexists('riskDetail_riskScore_score_d', ''),\r\n        riskDetail_riskScore_maxScore_d=column_ifexists('riskDetail_riskScore_maxScore_d', ''),\r\n        riskDetail_rating_s=column_ifexists('riskDetail_rating_s', ''),\r\n        riskDetail_score_s=column_ifexists('riskDetail_score_s', ''),\r\n        status_s=column_ifexists('status_s', ''),\r\n        firstSeen_d=column_ifexists('firstSeen_d', ''),\r\n        lastSeen_d=column_ifexists('lastSeen_d', ''),\r\n        alertTime_d=column_ifexists('alertTime_d', ''),\r\n        resource_id=iff(isnotempty(column_ifexists('resource_id_s', '')), column_ifexists('resource_id_s', ''), column_ifexists('resource_id_g', ''))\r\n    | project-rename\r\n        Reason=reason_s,\r\n        AlertMessage=policy_name_s,\r\n        AlertDescription=policy_description_s,\r\n        AlertSeverity=policy_severity_s,\r\n        PolicyRecommendation=policy_recommendation_s,\r\n        PolicyLabels=policy_labels_s,\r\n        PolicyLastModifiedOn=policy_lastModifiedOn_d,\r\n        PolicyLastModifiedBy=policy_lastModifiedBy_s,\r\n        PolicyDeleted=policy_deleted_b,\r\n        PolicyRemediationDescription=policy_remediation_description_s,\r\n        PolicyRemediationImpact=policy_remediation_impact_s,\r\n        PolicyRemediationCliScriptTemplate=policy_remediation_cliScriptTemplate_s,\r\n        ResourceId=resource_id,\r\n        History=history_s,\r\n        ResourceDataMfaActive=resource_data_mfa_active_b,\r\n        ResourceDataCert1Active=resource_data_cert_1_active_b,\r\n        ResourceDataCert2Active=resource_data_cert_2_active_b,\r\n        ResourceDataPasswordEnabled=resource_data_password_enabled_s,\r\n        ResourceDataPasswordLastUsed=resource_data_password_last_used_s,\r\n        ResourceDataUserCreationTime=resource_data_user_creation_time_t,\r\n        ResourceDataAccessKey1Active=resource_data_access_key_1_active_b,\r\n        ResourceDataAccessKey2Active=resource_data_access_key_2_active_b,\r\n        ResourceDataCert1LastRotated=resource_data_cert_1_last_rotated_s,\r\n        ResourceDataCert2LastRotated=resource_data_cert_2_last_rotated_s,\r\n        ResourceDataPasswordLastChanged=resource_data_password_last_changed_s,\r\n        ResourceDataPasswordNextRotation=resource_data_password_next_rotation_s,\r\n        ResourceDataAccessKey1LastRotated=resource_data_access_key_1_last_rotated_t,\r\n        ResourceDataAccessKey2LastRotated=resource_data_access_key_2_last_rotated_s,\r\n        ResourceDataAccessKey1LastUsedDate=resource_data_access_key_1_last_used_date_t,\r\n        ResourceDataAccessKey2LastUsedDate=resource_data_access_key_2_last_used_date_s,\r\n        ResourceDataAccessKey1LastUsedRegion=resource_data_access_key_1_last_used_region_s,\r\n        ResourceDataAccessKey2LastUsedRegion=resource_data_access_key_2_last_used_region_s,\r\n        ResourceDataAccessKey1LastUsedService=resource_data_access_key_1_last_used_service_s,\r\n        ResourceDataAccessKey2LastUsedService=resource_data_access_key_2_last_used_service_s,\r\n        ResourceRrn=resource_rrn_s,\r\n        ResourceName=resource_name_s,\r\n        ResourceAccount=resource_account_s,\r\n        ResourceAccountId=resource_accountId_s,\r\n        ResourceCloudAccountGroups=resource_cloudAccountGroups_s,\r\n        ResourceRegion=resource_region_s,\r\n        ResourceRegionId=resource_regionId_s,\r\n        ResourceResourceType=resource_resourceType_s,\r\n        ResourceResourceApiName=resource_resourceApiName_s,\r\n        ResourceUrl=resource_url_s,\r\n        ResourceDataArn=resource_data_arn_s,\r\n        ResourceDataUser=resource_data_user_s,\r\n        ResourceAdditionalInfoAccessKeyAge=resource_additionalInfo_accessKeyAge_s,\r\n        ResourceAdditionalInfoInactiveSinceTs=resource_additionalInfo_inactiveSinceTs_s,\r\n        ResourceCloudType=resource_cloudType_s,\r\n        ResourceResourceTs=resource_resourceTs_d,\r\n        AlertId=id_s,\r\n        PolicyPolicyId=policy_policyId_g,\r\n        PolicyPolicyType=policy_policyType_s,\r\n        PolicySystemDefault=policy_systemDefault_b,\r\n        PolicyRemediable=policy_remediable_b,\r\n        AlertRules=alertRules_s,\r\n        RiskDetailRiskScoreScore=riskDetail_riskScore_score_d,\r\n        RiskDetailRiskScoreMaxScore=riskDetail_riskScore_maxScore_d,\r\n        RiskDetailRating=riskDetail_rating_s,\r\n        RiskDetailScore=riskDetail_score_s,\r\n        Status=status_s,\r\n        FirstSeen=firstSeen_d,\r\n        LastSeen=lastSeen_d,\r\n        AlertTime=alertTime_d\r\n    | project-away\r\n        resource_id_s,\r\n        resource_id_g\r\n};\r\nunion isfuzzy=true Alert_view, Audit_view",
+        "version": 1
+      }
     },
     {
-      "id": "[variables('_connector1-source')]",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('connector1-name'))]",
-      "apiVersion": "2021-03-01-preview",
-      "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 1')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - Access keys used",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(30d)\n| where ResourceType =~ 'Login'\n| where EventMessage has 'access key'\n| summarize by UserName, SrcIpAddr\n| extend IPCustomEntity = SrcIpAddr\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for access keys used for programmatic access."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 2')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - Top sources of failed logins",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| summarize count() by SrcIpAddr\n| order by count_ desc\n| extend IPCustomEntity = SrcIpAddr\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for top source IP addresses of failed logins."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 3')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - Top users by failed logins",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| summarize count() by UserName\n| order by count_ desc\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for users who have large number of failed logins."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 4')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - High risk score opened alerts",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| where Status =~ 'open'\n| extend r_score = 0.85 * toint(RiskDetailRiskScoreMaxScore)\n| extend i_RiskDetailRiskScoreScore = toint(RiskDetailRiskScoreScore)\n| where i_RiskDetailRiskScoreScore > r_score\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for alerts with high risk score value."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 5')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - High severity alerts",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| where AlertSeverity =~ 'high'\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for high severity alerts."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 6')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - New users",
+        "category": "Hunting Queries",
+        "query": "let known_users = \nPaloAltoPrismaCloud\n| where TimeGenerated between (ago(30d) .. (1d))\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| summarize makeset(UserName);\nPaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where ResourceType =~ 'Login'\n| where EventMessage !has 'access key'\n| where UserName !in (known_users)\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for new users."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 7')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - Opened alerts",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| where Status =~ 'open'\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches opened alerts."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 8')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - Top recources with alerts",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'NEW_ALERT'\n| summarize count() by ResourceName\n| order by count_ desc\n| extend AccountCustomEntity = ResourceName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches for resources which appeared in different alerts."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/PaloAltoPrismaCloud Hunting Query 9')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Palo Alto Prisma Cloud - Updated resources",
+        "category": "Hunting Queries",
+        "query": "PaloAltoPrismaCloud\n| where TimeGenerated > ago(24h)\n| where Reason =~ 'RESOURCE_UPDATED'\n| extend AccountCustomEntity = UserName\n",
+        "version": 1,
+        "tags": [
+          {
+            "name": "description",
+            "value": "Query searches recently updated resources."
+          },
+          {
+            "name": "tactics",
+            "value": "InitialAccess"
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('connector1-name')]",
+      "type": "Microsoft.SecurityInsights/dataConnectors",
+      "apiVersion": "[variables('dataConnectorApiVersion')]",
+      "location": "[parameters('workspace-location')]",
       "kind": "GenericUI",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "connectorUiConfig": {
           "title": "Palo Alto Prisma Cloud",
