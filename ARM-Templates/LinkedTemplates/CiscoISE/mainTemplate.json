@@ -452,7 +452,36 @@
           "CredentialAccess"
         ],
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "HostCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -482,7 +511,27 @@
           "Execution"
         ],
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -512,7 +561,27 @@
           "Execution"
         ],
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -535,7 +604,27 @@
         "suppressionDuration": "PT1H",
         "suppressionEnabled": false,
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "HostCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -561,7 +650,18 @@
           "CredentialAccess"
         ],
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -587,7 +687,18 @@
           "DefenseEvasion"
         ],
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -613,7 +724,36 @@
           "DefenseEvasion"
         ],
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "HostCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -652,7 +792,7 @@
     {
       "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
       "apiVersion": "[variables('savedSearchApiVersion')]",
-      "name": "[concat(parameters('workspace'), '/CiscoISE - Authentication attempts to suspended user account')]",
+      "name": "[concat(parameters('workspace'), '/Cisco ISE - Authentication attempts to suspended user account')]",
       "dependsOn": [
         "[variables('workspaceResourceId')]"
       ],
