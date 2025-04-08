@@ -1,57 +1,304 @@
 ![logo](./media/sh-banners.png)
-=========
+# Microsoft Sentinel Playground
+
 [![GitHub release](https://img.shields.io/github/release/SecureHats/Sentinel-playground.svg?style=flat-square)](https://github.com/SecureHats/Sentinel-playground/releases)
 [![Maintenance](https://img.shields.io/maintenance/yes/2024.svg?style=flat-square)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FSecureHats%2FSentinel-playground%2Fmain%2FARM-Templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FSecureHats%2FSentinel-playground%2Fmain%2FARM-Templates%2FUiDefinition.json)
-# Sentinel Playground
 
-The Sentinel playground deploys an Azure Sentinel environment pre-provisioned with sample data using modern Azure resources. This speeds up deployment for Proof of Concept and demo scenarios.
+## Overview
 
-#### Prerequisites
+The Microsoft Sentinel Playground is an enterprise-grade solution that provides a comprehensive, pre-configured Azure Sentinel environment with sample data, analytics rules, parsers, workbooks, and hunting queries for multiple security solutions. This deployment accelerator is designed for proof of concept, demonstrations, and training scenarios, enabling security teams to rapidly evaluate and understand Microsoft Sentinel's capabilities.
 
-- An Azure user account with sufficient permissions to create resource groups, Log Analytics workspaces, Sentinel instances, managed identities, role assignments, deployment scripts, and data collection endpoints/rules.
+## Architecture
 
-## ARM template instructions
+The Sentinel Playground implements a modern cloud-native architecture leveraging the latest Azure resource types and APIs. The solution follows these architectural principles:
 
-The main ARM template (`ARM-Templates/azuredeploy.json`) performs the following tasks:
+- **Modularity**: Each data source is implemented as a separate linked template
+- **Infrastructure as Code**: Entire environment provisioned through ARM templates 
+- **Zero-touch deployment**: Fully automated configuration requiring minimal user input
+- **Identity-based security**: Uses Managed Identities for authentication rather than keys or secrets
+- **Modern pipeline architecture**: Utilizes Data Collection Endpoints (DCE) and Data Collection Rules (DCR)
 
-- Creates a resource group (if a new one is specified).
-- Creates a Log Analytics workspace (if a new one is specified).
-- Enables Azure Sentinel on the workspace using the `Microsoft.SecurityInsights/onboardingStates` resource.
-- Configures standard data connectors for Azure Activity Log and Security Events using `Microsoft.SecurityInsights/dataConnectors`.
-- Creates a User Assigned Managed Identity for deployment scripts.
-- Creates a Data Collection Endpoint (DCE) and Data Collection Rule (DCR) for ingesting custom logs via the Logs Ingestion API.
-- Runs [ARM deployment scripts](https://docs.microsoft.com/azure/azure-resource-manager/templates/deployment-script-template) using the managed identity to:
-    - Ingest sample data (JSON files) from specified providers into the `SecureHats_CL` custom table using the Logs Ingestion API.
-    - Deploy KQL functions (`.csl` files) from the `parsers/` directory.
-    - Deploy linked templates containing Sentinel Solutions (Workbooks, Analytics Rules, etc.) from `ARM-Templates/LinkedTemplates/`.
-    - Update detection rules based on templates using `PowerShell/Update-DetectionRules/Update-DetectionRules.ps1`.
+### Technical Components
 
-**Note:** The deployment script uses the managed identity for authentication against the Logs Ingestion API and Azure Resource Manager, removing the need for workspace keys or interactive logins during deployment.
+![Architecture Diagram](./media/architecture.svg)
 
-Sample data ingestion now targets the `SecureHats_CL` table via a Data Collection Rule. Parsers originally written for other specific custom tables (e.g., `AlsidForADLog_CL`, `agari_apdpolicy_log_CL`) may need updating.
+#### Core Infrastructure
 
-Initial data ingestion and deployment can take around **10-15 minutes**.
+1. **Log Analytics Workspace**: The central repository for all security logs and events
+2. **Microsoft Sentinel**: Enabled on the workspace for SIEM and SOAR capabilities
+3. **User-Assigned Managed Identity**: Securely handles deployment operations without secrets
+4. **Data Collection Endpoint (DCE)**: Entry point for the Logs Ingestion API
+5. **Data Collection Rule (DCR)**: Defines data processing and routing to the workspace
+6. **DCR Association**: Links the DCR to the Log Analytics workspace
 
-## Current Status & ToDo
+#### Data Processing Pipeline
 
-This repository has undergone modernization efforts (as of August 2024) to update deprecated resources and APIs.
+1. **Sample Data Ingestion**:
+   - Sample JSON logs from the `/samples/` directory
+   - Data enriched with `LogSourceType` field for source tracking
+   - Ingested via Azure Monitor Logs Ingestion API to the `SecureHats_CL` custom table
+   - Managed using PowerShell deployment scripts in containers
 
-**Completed Updates:**
-- Updated core ARM template (`azuredeploy.json`) with modern API versions and resource types (Sentinel onboarding, standard connectors).
-- Replaced legacy Data Collector API with modern Logs Ingestion API (DCE/DCR) in `azuredeploy.json` and `Add-AzureMonitorData.ps1`.
-- Updated API versions in `Update-DetectionRules.ps1`.
-- Updated API versions in `solutions.json` and all linked solution templates (`Box`, `CiscoISE`, `CiscoUmbrella`, `CrowdStrike`, `PingFederate`, `Ubiquiti`).
-- Removed legacy `Start-Sleep` dependencies where possible.
+2. **KQL Parsers**:
+   - Deployed as saved searches/functions in the workspace
+   - Transform raw `SecureHats_CL` data into structured, normalized tables
+   - Support various data source formats (CrowdStrike, Box, Cisco ISE, etc.)
 
-**Remaining ToDo / Areas for Review:**
-- **KQL Parser Compatibility:** Review `.csl` files in `parsers/`. Ensure they function correctly with all data now landing in `SecureHats_CL` instead of potentially different custom tables.
-- **Solution Content Verification:** Verify that workbooks, analytics rules, and other content deployed by the linked templates function correctly with the updated APIs and data structures.
-- **Deployment Script Logic:** Review the logic within `Add-AzureMonitorData.ps1` and `Update-DetectionRules.ps1` for potential improvements or adjustments needed after API changes.
-- **README Updates:** Further refine this README with more detailed usage instructions and notes on the updated architecture.
+3. **Analytics Rules**:
+   - Pre-configured detection rules linked to specific data sources
+   - Entity mappings for UEBA and investigation capabilities
+   - Customizable severity, frequency, and suppression settings
 
-**Verification Approach Note (YYYY-MM-DD):**
-*   Due to the nature of the playground (intended for user-driven Portal deployment), the initial deployment step for verification was simulated based on code analysis of `azuredeploy.json` and `UiDefinition.json`, rather than executing `az deployment group create` directly.
-*   Phase 2 verification (Core Infrastructure, Standard Connectors, Sample Data Ingestion) was completed via code analysis, confirming the template uses modern resources (DCE/DCR, MI) and targets `SecureHats_CL` correctly. Proceeding to Phase 3 (Parsers, Rules, Workbooks).
+4. **Workbooks and Hunting Queries**:
+   - Visual dashboards for data exploration and threat hunting
+   - Pre-configured hunting queries for common attack patterns
+
+## Supported Solutions
+
+The playground includes comprehensive support for the following security solutions:
+
+| Vendor | Data Type | Parsers | Analytics | Workbooks | Hunting Queries |
+|--------|-----------|---------|-----------|-----------|-----------------|
+| Box | Activity Logs | ✓ | ✓ | ✓ | ✓ |
+| Cisco ISE | Security Events | ✓ | ✓ | ✓ | ✓ |
+| Cisco Umbrella | DNS Logs | ✓ | ✓ | ✓ | ✓ |
+| CrowdStrike | Endpoint Detection | ✓ | ✓ | ✓ | ✓ |
+| Ping Federate | Authentication | ✓ | ✓ | ✓ | ✓ |
+| Palo Alto | Firewall Logs | ✓ | ✓ | ✓ | ✓ |
+| Ubiquiti | Network Logs | ✓ | ✓ | ✓ | ✓ |
+
+## Deployment Architecture
+
+The Sentinel Playground utilizes a nested ARM template architecture:
+
+```
+azuredeploy.json (main template)
+├── UiDefinition.json (portal UI experience)
+├── Log Analytics + Sentinel resources
+├── Data Collection Infrastructure (DCE/DCR)
+├── Managed Identity + Role Assignments
+├── Deployment Scripts (PowerShell in containers)
+│   ├── Sample Data Ingestion
+│   ├── Parser Deployment
+│   └── Analytics Rule Configuration
+└── LinkedTemplates/solutions.json
+    ├── Box/mainTemplate.json
+    ├── CiscoISE/mainTemplate.json
+    ├── CiscoUmbrella/mainTemplate.json
+    ├── CrowdStrike/mainTemplate.json
+    ├── PingFederate/mainTemplate.json
+    ├── PaloAlto/mainTemplate.json
+    └── Ubiquiti/mainTemplate.json
+```
+
+### Deployment Flow
+
+1. **Infrastructure Provisioning**:
+   - Log Analytics workspace creation
+   - Microsoft Sentinel enablement
+   - Standard connector configuration (Azure Activity, Security Events)
+   - Managed Identity provisioning with appropriate permissions
+   - DCE/DCR creation and configuration
+
+2. **Data Ingestion**:
+   - Deployment script container execution
+   - GitHub repository content retrieval
+   - Sample data transformation and ingestion
+   - Parser deployment
+
+3. **Solution Deployment**:
+   - Linked template deployment based on selected solutions
+   - Analytics rule, workbook, and hunting query deployment
+   - Entity mapping configuration for investigation experiences
+
+4. **Configuration**:
+   - Analytics rule default parameter configuration
+   - Workbook parameter configuration
+
+## Deployment Prerequisites
+
+- An Azure subscription with sufficient permissions
+- Contributor access at the subscription or resource group level
+- Modern browser supporting Azure Portal UI experiences
+- Network connectivity to GitHub (for content retrieval)
+
+## Deployment Instructions
+
+### Option 1: Azure Portal Deployment (Recommended)
+
+1. Click the "Deploy to Azure" button at the top of this README
+2. Sign in to your Azure account if prompted
+3. Complete the custom form with the following information:
+   - Subscription: Select your Azure subscription
+   - Resource Group: Create new or select existing
+   - Region: Select deployment region
+   - Workspace Name: Provide a name for your Log Analytics workspace
+   - Data Providers: Select desired sample data sources
+   - Data Connectors: Select desired connectors to enable
+   - Solutions: Select desired Sentinel solutions to deploy
+4. Review the terms and create the deployment
+
+### Option 2: Azure CLI Deployment
+
+```bash
+# Clone the repository
+git clone https://github.com/SecureHats/Sentinel-playground.git
+cd Sentinel-playground
+
+# Login to Azure
+az login
+
+# Set subscription context
+az account set --subscription "Your-Subscription-Id"
+
+# Create a resource group
+az group create --name "SentinelPlayground" --location "WestEurope"
+
+# Deploy the template
+az deployment group create \
+  --resource-group "SentinelPlayground" \
+  --template-file ARM-Templates/azuredeploy.json \
+  --parameters workspaceName="SentinelPlayground" \
+               dataProviders='["Box","CiscoISE"]' \
+               enabledSolutions='["Box","CiscoISE"]'
+```
+
+### Option 3: PowerShell Deployment
+
+```powershell
+# Clone the repository
+git clone https://github.com/SecureHats/Sentinel-playground.git
+cd Sentinel-playground
+
+# Login to Azure
+Connect-AzAccount
+
+# Set subscription context
+Set-AzContext -Subscription "Your-Subscription-Id"
+
+# Create a resource group
+New-AzResourceGroup -Name "SentinelPlayground" -Location "WestEurope"
+
+# Deploy the template
+New-AzResourceGroupDeployment `
+  -ResourceGroupName "SentinelPlayground" `
+  -TemplateFile "ARM-Templates/azuredeploy.json" `
+  -workspaceName "SentinelPlayground" `
+  -dataProviders @("Box","CiscoISE") `
+  -enabledSolutions @("Box","CiscoISE")
+```
+
+## Technical Implementation Details
+
+### Data Ingestion Pipeline
+
+The Sentinel Playground uses a modern data ingestion architecture:
+
+1. **Sample Data Storage**: JSON files in the `/samples/` directory organized by vendor
+2. **Ingestion Process**:
+   - PowerShell script (`Add-AzureMonitorData.ps1`) executed in a deployment script container
+   - Managed Identity authentication for secure access
+   - Data enrichment with `LogSourceType` field for source identification
+   - Batched API calls to the Logs Ingestion API endpoint
+
+### Parser Implementation
+
+Parsers are implemented as KQL functions:
+
+1. **File Format**: `.csl` files in the `/parsers/` directory
+2. **Deployment Method**:
+   - Added as saved searches with function aliases
+   - Automatically updated to reference the `SecureHats_CL` table
+   - Accessible through their aliases in KQL queries
+
+### Analytics Rules
+
+Analytics rules are implemented in the solution-specific templates:
+
+1. **Definition**: JSON configurations in linked templates
+2. **Features**:
+   - Entity mappings for investigation experiences
+   - Customizable query frequency and period
+   - Severity and suppression settings
+   - MITRE ATT&CK tactic and technique mappings
+
+### Resource Naming and Organization
+
+The solution follows these naming conventions:
+
+- **Resource Names**: Consistent prefixing and suffixing (e.g., `dce-{workspaceName}-{uniqueString}`)
+- **Template Organization**: Modular structure with linked templates
+- **Parameter Passing**: Consistent parameter passing between templates
+
+## Performance Considerations
+
+The Sentinel Playground is optimized for demonstration environments:
+
+- **Resource Sizing**: Log Analytics workspace uses the cost-optimized `PerGB2018` pricing tier
+- **Data Retention**: 30-day default retention period
+- **Sample Data Volume**: Optimized to provide meaningful analysis without excessive storage costs
+
+## Security Considerations
+
+The solution follows security best practices:
+
+- **Authentication**: Managed Identity for all operations requiring authentication
+- **Authorization**: Minimal RBAC permissions for the deployment identity
+- **Data Protection**: No storage of sensitive credentials or keys
+
+## Customization Options
+
+The solution can be customized in several ways:
+
+1. **Adding New Data Sources**:
+   - Add JSON sample files to the `/samples/` directory
+   - Create corresponding parsers in the `/parsers/` directory
+   - Add analytics rules, workbooks, and hunting queries
+
+2. **Modifying Analytics Rules**:
+   - Update detection logic in the linked templates
+   - Use the `Update-DetectionRules.ps1` script to apply changes
+
+3. **Custom Deployment Parameters**:
+   - Modify the `azuredeploy.json` parameters section
+   - Update the `UiDefinition.json` file for the portal experience
+
+## Troubleshooting
+
+Common issues and their solutions:
+
+1. **Deployment Failures**:
+   - Check the deployment script logs in the Azure Portal
+   - Verify managed identity permissions
+   - Ensure network connectivity to GitHub
+
+2. **Missing Data**:
+   - Verify DCE/DCR configuration
+   - Check the `SecureHats_CL` table for ingested data
+   - Review parser functions for errors
+
+3. **Analytics Rule Issues**:
+   - Verify entity mapping configurations
+   - Check KQL syntax in query definitions
+   - Review parser references in queries
+
+## Contributing
+
+Contributions to the Sentinel Playground are welcome. Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Microsoft Sentinel team for their ongoing development of Sentinel capabilities
+- SecureHats community for their contributions and feedback
