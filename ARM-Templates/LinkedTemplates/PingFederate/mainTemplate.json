@@ -175,7 +175,7 @@
       "kind": "shared",
       "apiVersion": "[variables('workbookApiVersion')]",
       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "displayName": "[concat(parameters('workbook1-name'), ' - ', parameters('formattedTimeNow'))]",
@@ -191,8 +191,8 @@
       "name": "[parameters('analytic1-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects abnormal password reset attempts for user in short period of time.",
@@ -217,8 +217,8 @@
       "name": "[parameters('analytic2-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects abnormal number of failed authentications.",
@@ -243,8 +243,8 @@
       "name": "[parameters('analytic3-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects abnormal number of successful authentications.",
@@ -269,8 +269,8 @@
       "name": "[parameters('analytic4-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects account lockout events.",
@@ -295,8 +295,8 @@
       "name": "[parameters('analytic5-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects authentication attempts from Tor network.",
@@ -321,8 +321,8 @@
       "name": "[parameters('analytic6-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects authentication success after multiple fails for same user account.",
@@ -347,8 +347,8 @@
       "name": "[parameters('analytic7-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects disabled user account authenticaiton attempt.",
@@ -373,8 +373,8 @@
       "name": "[parameters('analytic8-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects sign-in attempt with expired password.",
@@ -399,8 +399,8 @@
       "name": "[parameters('analytic9-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects sign-in from IPs associated with malicious activity.",
@@ -425,8 +425,8 @@
       "name": "[parameters('analytic10-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects unusual country in authentication requests.",
@@ -451,8 +451,8 @@
       "name": "[parameters('analytic11-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "description": "Detects unusual mail domain in authentication requests.",
@@ -683,8 +683,8 @@
       "apiVersion": "[variables('dataConnectorApiVersion')]",
       "location": "[parameters('workspace-location')]",
       "kind": "GenericUI",
-       "dependsOn": [
-          "[variables('workspaceResourceId')]"
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
       ],
       "properties": {
          "connectorUiConfig": {

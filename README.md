@@ -37,17 +37,16 @@ Initial data ingestion and deployment can take around **10-15 minutes**.
 
 ## Current Status & ToDo
 
-This repository has undergone modernization efforts (as of July 2024) to update deprecated resources and APIs.
+This repository has undergone modernization efforts (as of August 2024) to update deprecated resources and APIs.
 
 **Completed Updates:**
 - Updated core ARM template (`azuredeploy.json`) with modern API versions and resource types (Sentinel onboarding, standard connectors).
 - Replaced legacy Data Collector API with modern Logs Ingestion API (DCE/DCR) in `azuredeploy.json` and `Add-AzureMonitorData.ps1`.
 - Updated API versions in `Update-DetectionRules.ps1`.
-- Updated API versions in `solutions.json` and several linked solution templates (`Box`, `CiscoISE`, `CiscoUmbrella`, `CrowdStrike`).
+- Updated API versions in `solutions.json` and all linked solution templates (`Box`, `CiscoISE`, `CiscoUmbrella`, `CrowdStrike`, `PingFederate`, `Ubiquiti`).
 - Removed legacy `Start-Sleep` dependencies where possible.
 
 **Remaining ToDo / Areas for Review:**
-- **Linked Template Updates:** The `PingFederate` and `Ubiquiti` solution templates (`ARM-Templates/LinkedTemplates/.../mainTemplate.json`) require further review and updates for API versions and resource types. Automated updates failed for these.
 - **KQL Parser Compatibility:** Review `.csl` files in `parsers/`. Ensure they function correctly with all data now landing in `SecureHats_CL` instead of potentially different custom tables.
 - **Solution Content Verification:** Verify that workbooks, analytics rules, and other content deployed by the linked templates function correctly with the updated APIs and data structures.
 - **Deployment Script Logic:** Review the logic within `Add-AzureMonitorData.ps1` and `Update-DetectionRules.ps1` for potential improvements or adjustments needed after API changes.
