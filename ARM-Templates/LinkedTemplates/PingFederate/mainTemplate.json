@@ -148,7 +148,6 @@
   },
   "variables": {
     "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
-    // Define updated API versions
     "deploymentApiVersion": "2022-09-01",
     "workbookApiVersion": "2022-04-01",
     "alertRuleApiVersion": "2023-11-01",
@@ -159,7 +158,7 @@
     {
       "name": "pid-ae2dfe74-1291-483a-9a78-38a8d5f5f3a5-partnercenter",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "[variables('deploymentApiVersion')]", // Updated
+      "apiVersion": "[variables('deploymentApiVersion')]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -174,7 +173,7 @@
       "name": "[parameters('workbook1-id')]",
       "location": "[parameters('workspace-location')]",
       "kind": "shared",
-      "apiVersion": "[variables('workbookApiVersion')]", // Updated
+      "apiVersion": "[variables('workbookApiVersion')]",
       "dependsOn": [
           "[variables('workspaceResourceId')]"
       ],
@@ -182,11 +181,10 @@
         "displayName": "[concat(parameters('workbook1-name'), ' - ', parameters('formattedTimeNow'))]",
         "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"**NOTE**: This workbook depends on a parser based on a Kusto Function to work as expected [**PingFederateEvent**](https://aka.ms/sentinel-PingFederate-parser) which is deployed with the Azure Sentinel Solution.\"},\"name\":\"text - 2\"},{\"type\":9,\"content\":{\"version\":\"KqlParameterItem/1.0\",\"parameters\":[{\"id\":\"f7b02575-829c-435d-a4d3-251db9daf80e\",\"version\":\"KqlParameterItem/1.0\",\"name\":\"TimeRange\",\"type\":4,\"value\":{\"durationMs\":2592000000},\"typeSettings\":{\"selectableValues\":[{\"durationMs\":1800000},{\"durationMs\":3600000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000},{\"durationMs\":7776000000}]},\"timeContext\":{\"durationMs\":86400000}}],\"style\":\"pills\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"name\":\"parameters - 1\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| make-series TotalEvents = count() default = 0 on TimeGenerated from {TimeRange:start} to {TimeRange:end} step {TimeRange:grain};\",\"size\":0,\"title\":\"Events over time\",\"color\":\"greenDark\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"areachart\",\"tileSettings\":{\"showBorder\":false}},\"customWidth\":\"65\",\"name\":\"query - 2\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| where isnotempty(DstGeoCountry)\\r\\n| summarize count() by DstGeoCountry\",\"size\":3,\"title\":\"Geo distribution\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"70\",\"name\":\"query - 0\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| where isnotempty(DstUserName)\\r\\n| summarize u_users = dcount(DstUserName)\",\"size\":3,\"title\":\"Users\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"card\",\"gridSettings\":{\"formatters\":[{\"columnMatch\":\"Unique Users\",\"formatter\":1}]},\"textSettings\":{\"style\":\"bignumber\"}},\"name\":\"query - 0\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| where isnotempty(SrcIpAddr)\\r\\n| summarize IPs = dcount(SrcIpAddr)\",\"size\":3,\"title\":\"IP Addresses\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"card\",\"textSettings\":{\"style\":\"bignumber\"}},\"name\":\"query - 1\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| where isnotempty(DstGeoCountry)\\r\\n| summarize u_country = dcount(DstGeoCountry)\",\"size\":3,\"title\":\"Countries\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"card\",\"textSettings\":{\"style\":\"bignumber\"}},\"name\":\"query - 2\"}]},\"customWidth\":\"30\",\"name\":\"group - 1\"}]},\"customWidth\":\"35\",\"name\":\"group - 3\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"let data = PingFederateEvent\\r\\n| where isnotempty(EventType);\\r\\ndata\\r\\n| summarize Count = count() by EventType\\r\\n| join kind = inner (data\\r\\n    | make-series Trend = count() default = 0 on TimeGenerated from {TimeRange:start} to {TimeRange:end} step {TimeRange:grain} by EventType)\\r\\n    on EventType\\r\\n\\r\\n\\r\\n\\r\\n\",\"size\":3,\"title\":\"Event Types\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"tiles\",\"tileSettings\":{\"titleContent\":{\"columnMatch\":\"EventType\"},\"leftContent\":{\"columnMatch\":\"Count\",\"formatter\":12,\"formatOptions\":{\"palette\":\"auto\"}},\"showBorder\":false}},\"customWidth\":\"40\",\"name\":\"query - 0\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| where isnotempty(SrcIpAddr)\\r\\n| summarize count() by SrcIpAddr\\r\\n| top 5 by count_\",\"size\":3,\"title\":\"Top Sources\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"35\",\"name\":\"query - 1\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"PingFederateEvent\\r\\n| where isnotempty(DstUserName)\\r\\n| summarize ['Total Events'] = count() by DstUserName\\r\\n| top 10 by ['Total Events']\",\"size\":3,\"title\":\"Top users\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"table\",\"gridSettings\":{\"formatters\":[{\"columnMatch\":\"DstUserName\",\"formatter\":4,\"formatOptions\":{\"palette\":\"blue\"}},{\"columnMatch\":\"Total Events\",\"formatter\":4,\"formatOptions\":{\"palette\":\"turquoise\"}}]}},\"customWidth\":\"25\",\"name\":\"query - 2\"}]},\"name\":\"group - 4\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"CommonSecurityLog_CL\\r\\n| where DeviceProduct =~ \\\"PingFederate\\\"\\r\\n| order by TimeGenerated desc\\r\\n| extend Reason = extract(@'description=;?(\\\\w+),.*', 1, AdditionalExtensions)\\r\\n| where isnotempty(Reason)\\r\\n| project TimeGenerated, EventType = DeviceEventClassID, Reason\",\"size\":0,\"title\":\"Latest errors\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"table\",\"gridSettings\":{\"filter\":true}},\"name\":\"query - 5\"}],\"fromTemplateId\":\"sentinel-PingFederateWorkbook\",\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}\r\n",
         "version": "1.0",
-        "sourceId": "[variables('workspaceResourceId')]", // Corrected sourceId
+        "sourceId": "[variables('workspaceResourceId')]",
         "category": "sentinel"
       }
     },
-    // Alert Rules (updated type and API)
     {
       "type": "Microsoft.SecurityInsights/alertRules",
       "apiVersion": "[variables('alertRuleApiVersion')]",
@@ -197,7 +195,6 @@
           "[variables('workspaceResourceId')]"
       ],
       "properties": {
-         // Keep existing properties for analytic1
         "description": "Detects abnormal password reset attempts for user in short period of time.",
         "displayName": "Ping Federate - Abnormal password reset attempts",
         "enabled": false,
@@ -214,7 +211,240 @@
         ]
       }
     },
-    // ... Repeat for analytic2-id through analytic11-id ...
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic2-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects abnormal number of failed authentications.",
+        "displayName": "Ping Federate - Abnormal number of failed authentications",
+        "enabled": false,
+        "query": "let threshold = 20;\nPingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| summarize count() by SrcIpAddr, bin(TimeGenerated, 1h)\n| where count_ > threshold\n| extend IPCustomEntity = SrcIpAddr\n",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "severity": "High",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic3-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects abnormal number of successful authentications.",
+        "displayName": "Ping Federate - Abnormal number of successful authentications",
+        "enabled": false,
+        "query": "let threshold = 30;\nPingFederateEvent\n| where EventType =~ 'AUTHN_SUCCESS'\n| summarize count() by DstUserName, bin(TimeGenerated, 1h)\n| where count_ > threshold\n| extend AccountCustomEntity = DstUserName\n",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "severity": "High",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic4-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects account lockout events.",
+        "displayName": "Ping Federate - Account lockout",
+        "enabled": false,
+        "query": "PingFederateEvent\n| where EventType =~ 'ACCOUNT_LOCKED'\n| extend AccountCustomEntity = DstUserName\n",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "severity": "High",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic5-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects authentication attempts from Tor network.",
+        "displayName": "Ping Federate - Authentication attempt from Tor",
+        "enabled": false,
+        "query": "let TorIps = externaldata(network:string) [\n    h@'https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Sample%20Data/Feeds/TorNodesList.csv'\n] with (format=\"csv\");\nPingFederateEvent\n| where SrcIpAddr in (TorIps)\n| extend IPCustomEntity = SrcIpAddr\n| extend AccountCustomEntity = DstUserName\n",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "severity": "Medium",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "InitialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic6-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects authentication success after multiple fails for same user account.",
+        "displayName": "Ping Federate - Authentication success after multiple fails",
+        "enabled": false,
+        "query": "let timeframe = 1h;\nlet threshold = 5;\nPingFederateEvent\n| where TimeGenerated > ago(timeframe)\n| where EventType =~ 'AUTHN_FAILED'\n| summarize makeset(SrcIpAddr), FailureCount = count() by DstUserName\n| where FailureCount > threshold\n| join kind=inner (\n    PingFederateEvent\n    | where TimeGenerated > ago(timeframe)\n    | where EventType =~ 'AUTHN_SUCCESS'\n) on DstUserName\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "severity": "Medium",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic7-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects disabled user account authenticaiton attempt.",
+        "displayName": "Ping Federate - Disabled user account authenticaiton attempt",
+        "enabled": false,
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| where Reason contains 'account disabled'\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "severity": "Medium",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic8-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects sign-in attempt with expired password.",
+        "displayName": "Ping Federate - Sign-in attempt with expired password",
+        "enabled": false,
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| where Reason contains 'password has expired'\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "severity": "Medium",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "CredentialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic9-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects sign-in from IPs associated with malicious activity.",
+        "displayName": "Ping Federate - Sign-in from IPs associated with malicious activity",
+        "enabled": false,
+        "query": "let MaliciousIPs = externaldata(TimeGenerated:datetime, IPAddress:string, Description:string) [\n    h@'https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/Sample%20Data/Feeds/GigasheetOpenData.csv'\n    ] with (format='csv', ignoreFirstRecord=true);\nPingFederateEvent\n| where SrcIpAddr in (MaliciousIPs | project IPAddress)\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "severity": "Medium",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "InitialAccess"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic10-id')]",
+      "kind": "Scheduled",
+      "location": "[parameters('workspace-location')]",
+       "dependsOn": [
+          "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "description": "Detects unusual country in authentication requests.",
+        "displayName": "Ping Federate - Unusual country.",
+        "enabled": false,
+        "query": "let known_countries = \nPingFederateEvent\n| where TimeGenerated between (ago(14d) .. (1d))\n| where isnotempty(DstGeoCountry)\n| summarize makeset(DstGeoCountry);\nPingFederateEvent\n| where isnotempty(DstGeoCountry)\n| where DstGeoCountry !in (known_countries)\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "P14D",
+        "severity": "Medium",
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "tactics": [
+          "InitialAccess"
+        ]
+      }
+    },
     {
       "type": "Microsoft.SecurityInsights/alertRules",
       "apiVersion": "[variables('alertRuleApiVersion')]",
@@ -225,7 +455,6 @@
           "[variables('workspaceResourceId')]"
       ],
       "properties": {
-         // Keep existing properties for analytic11
         "description": "Detects unusual mail domain in authentication requests.",
         "displayName": "Ping Federate - Unusual mail domain.",
         "enabled": false,
@@ -242,27 +471,26 @@
         ]
       }
     },
-    // Saved Searches (updated type, API, name, dependency)
     {
       "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
       "apiVersion": "[variables('savedSearchApiVersion')]",
-      "name": "[concat(parameters('workspace'), '/PingFederate Data Parser')]", // Correct name format
+      "name": "[concat(parameters('workspace'), '/PingFederateEvent')]",
       "dependsOn": [
         "[variables('workspaceResourceId')]"
       ],
       "properties": {
         "eTag": "*",
-        "displayName": "Ping Federate Data Parser",
+        "displayName": "PingFederateEvent",
         "category": "SecureHats",
         "functionAlias": "PingFederateEvent",
-        "query": "\nCommonSecurityLog_CL \n| extend ...", // Keep existing query
+        "query": "CommonSecurityLog\n| where DeviceProduct =~ 'PingFederate'\n| extend App = extract(@'app=(.*?),', 1, AdditionalExtensions)\n| extend ConnectionID = extract(@'connectionid=(.*?),', 1, AdditionalExtensions)\n| extend DstGeoCity = extract(@'geo.city=(.*?),', 1, AdditionalExtensions)\n| extend DstGeoCountry = extract(@'geo.country=(.*?),', 1, AdditionalExtensions)\n| extend DstLatitude = extract(@'geo.latitude=(.*?),', 1, AdditionalExtensions)\n| extend DstLongitude = extract(@'geo.longitude=(.*?),', 1, AdditionalExtensions)\n| extend Protocol = extract(@'protocol=(.*?),', 1, AdditionalExtensions)\n| extend EventResult = extract(@'event=(.*?),', 1, AdditionalExtensions)\n| extend DstUserName = extract(@'subject=(.*?),', 1, AdditionalExtensions)\n| extend HttpUserAgentOriginal = extract(@'useragent=(.*?),', 1, AdditionalExtensions)\n| extend trackingid = extract(@'trackingid=(.*?),', 1, AdditionalExtensions)\n| extend role = extract(@'role=(.*?),', 1, AdditionalExtensions)\n| extend partnerid = extract(@'partnerid=(.*?),', 1, AdditionalExtensions)\n| extend vhost = extract(@'vhost=(.*?),', 1, AdditionalExtensions)\n| extend host = extract(@'host=(.*?),', 1, AdditionalExtensions)\n| extend Reason = extract(@'description=(.*?),', 1, AdditionalExtensions)\n| extend SrcIpAddr = coalesce(SourceIP, SrcIpAddr)\n| extend EventType = DeviceEventClassID\n| project-away AdditionalExtensions, SentinelOriginalIP\n",
         "version": 1
       }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
       "apiVersion": "[variables('savedSearchApiVersion')]",
-      "name": "[concat(parameters('workspace'), '/PingFederate Hunting Query 1')]", // Correct name format
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Authentication URLs')]",
       "dependsOn": [
         "[variables('workspaceResourceId')]"
       ],
@@ -270,7 +498,7 @@
         "eTag": "*",
         "displayName": "Ping Federate - Authentication URLs",
         "category": "Hunting Queries",
-        "query": "PingFederateEvent\n| where ...", // Keep existing query
+        "query": "PingFederateEvent\n| where isnotempty(host)\n| summarize makeset(host) by DstUserName\n| extend AccountCustomEntity = DstUserName\n",
         "version": 1,
         "tags": [
           { "name": "description", "value": "Query searches for authentication URLs used." },
@@ -278,11 +506,162 @@
         ]
       }
     },
-    // ... Repeat for Hunting Query 2 through Hunting Query 10 ...
+     {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Authentications per Country')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Authentications per Country",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| summarize count() by DstGeoCountry\n| top 10 by count_ desc\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for top 10 authentication locations per country." },
+          { "name": "tactics", "value": "InitialAccess" }
+        ]
+      }
+    },
     {
       "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
       "apiVersion": "[variables('savedSearchApiVersion')]",
-      "name": "[concat(parameters('workspace'), '/PingFederate Hunting Query 10')]", // Correct name format
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Failed authentications per User')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Failed authentications per User",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| summarize ['Failed Count'] = count() by DstUserName\n| top 10 by ['Failed Count'] desc\n| extend AccountCustomEntity = DstUserName\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for top 10 users with failed authentications." },
+          { "name": "tactics", "value": "InitialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Failed authentications with reason')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Failed authentications with reason",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| summarize count() by Reason\n| top 10 by count_ desc\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for top 10 failed authentication reasons." },
+          { "name": "tactics", "value": "InitialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Invalid Password attempts')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Invalid Password attempts",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| where Reason contains 'InvalidPassword'\n| summarize ['Failed Count'] = count() by DstUserName, bin(TimeGenerated, 1h)\n| top 10 by ['Failed Count'] desc\n| extend AccountCustomEntity = DstUserName\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for users with many Invalid Password attempts in short period of time." },
+          { "name": "tactics", "value": "CredentialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Invalid Username attempts')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Invalid Username attempts",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_FAILED'\n| where Reason contains 'UnknownUsername'\n| summarize ['Failed Count'] = count() by SrcIpAddr, bin(TimeGenerated, 1h)\n| top 10 by ['Failed Count'] desc\n| extend IPCustomEntity = SrcIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for many Invalid Username attempts from same IP in short period of time." },
+          { "name": "tactics", "value": "CredentialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Successful authentications per User')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Successful authentications per User",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| where EventType =~ 'AUTHN_SUCCESS'\n| summarize ['Success Count'] = count() by DstUserName\n| top 10 by ['Success Count'] desc\n| extend AccountCustomEntity = DstUserName\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for top 10 users with successful authentications." },
+          { "name": "tactics", "value": "InitialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Top User agents')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Top User agents",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| summarize count() by HttpUserAgentOriginal\n| top 10 by count_ desc\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for top 10 user agents." },
+          { "name": "tactics", "value": "InitialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Users authenticated from multiple countries')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ping Federate - Users authenticated from multiple countries",
+        "category": "Hunting Queries",
+        "query": "PingFederateEvent\n| where isnotempty(DstGeoCountry)\n| summarize countries = makeset(DstGeoCountry) by DstUserName\n| where array_length(countries) > 1\n| extend AccountCustomEntity = DstUserName\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query searches for users authenticated from multiple countries." },
+          { "name": "tactics", "value": "InitialAccess" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ping Federate - Users recently reseted password')]",
       "dependsOn": [
         "[variables('workspaceResourceId')]"
       ],
@@ -290,7 +669,7 @@
         "eTag": "*",
         "displayName": "Ping Federate - Users recently reseted password",
         "category": "Hunting Queries",
-        "query": "PingFederateEvent\n| where ...", // Keep existing query
+        "query": "PingFederateEvent\n| where TimeGenerated > ago(24h)\n| where EventType == 'PWD_RESET'\n| summarize ['Last Password Reset Time'] = max(TimeGenerated) by DstUserName\n| extend AccountCustomEntity = DstUserName\n",
         "version": 1,
         "tags": [
           { "name": "description", "value": "Query searches for users who recently reseted their passwords." },
@@ -299,23 +678,118 @@
       }
     },
     {
-      // Note: Legacy connector definition using GenericUI kind.
-      "name": "[parameters('connector1-name')]", // Name is just the GUID
-      "type": "Microsoft.SecurityInsights/dataConnectors", // Updated type
-      "apiVersion": "[variables('dataConnectorApiVersion')]", // Updated
+      "name": "[parameters('connector1-name')]",
+      "type": "Microsoft.SecurityInsights/dataConnectors",
+      "apiVersion": "[variables('dataConnectorApiVersion')]",
       "location": "[parameters('workspace-location')]",
-      "kind": "GenericUI", // Kind may be deprecated
+      "kind": "GenericUI",
        "dependsOn": [
           "[variables('workspaceResourceId')]"
       ],
       "properties": {
-         // Keep existing properties for now
-         "connectorUiConfig": { 
+         "connectorUiConfig": {
            "title": "PingFederate",
            "publisher": "Ping Identity",
-           // ... Keep rest of existing connectorUiConfig ...
+           "descriptionMarkdown": "The PingFederate data connector provides the capability to ingest Common Event Format (CEF) logs from PingFederate audit logs into Azure Sentinel. Refer to [PingFederate documentation](https://documentation.pingidentity.com/pingfederate/pf93/index.shtml#adminGuide/concept/auditingLogging.html) for more information.",
+           "graphQueries": [
+             {
+               "metricName": "Total events received",
+               "legend": "PingFederateEvent",
+               "baseQuery": "PingFederateEvent"
+             }
+           ],
+           "sampleQueries": [
+             {
+               "description": "All logs",
+               "query": "PingFederateEvent\n | sort by TimeGenerated"
+             }
+           ],
+           "dataTypes": [
+             {
+               "name": "CommonSecurityLog (PingFederateEvent)",
+               "lastDataReceivedQuery": "PingFederateEvent\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+             }
+           ],
+           "connectivityCriterias": [
+             {
+               "type": "IsConnectedQuery",
+               "value": [
+                 "PingFederateEvent\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(30d)"
+               ]
+             }
+           ],
+           "availability": {
+             "status": 1,
+             "isPreview": true
+           },
+           "permissions": {
+             "resourceProvider": [
+               {
+                 "provider": "Microsoft.OperationalInsights/workspaces",
+                 "permissionsDisplayText": "read and write permissions on the workspace are required.",
+                 "providerDisplayName": "Workspace",
+                 "scope": "Workspace",
+                 "requiredPermissions": {
+                   "write": true,
+                   "read": true,
+                   "delete": true
+                 }
+               }
+             ],
+             "customs": [
+               {
+                 "name": "CEF agent machine",
+                 "description": "A Linux Syslog agent machine is required with CEF collector installed. Install the CEF collector [from the agent management page](https://docs.microsoft.com/azure/sentinel/connect-cef-agent)."
+               },
+               {
+                 "name": "Configure PingFederate",
+                 "description": "Refer to the [PingFederate documentation](https://documentation.pingidentity.com/pingfederate/pf93/index.shtml#adminGuide/task/configuringAuditLogging.html) to configure log forwarding.",
+                 "instructionSteps": []
+               }
+             ]
+           },
+           "instructionSteps": [
+             {
+               "title": "Follow the steps below to connect your PingFederate logs.",
+               "description": "",
+               "instructions": []
+             },
+             {
+               "title": "1. Install and onboard the agent for Linux",
+               "description": "Typically, you should install the agent on a different computer from the one on which the logs are generated.\n\n > Linux Syslog agent machine can be either your physical or virtual machine in your premises, an Azure VM, or a VM in another cloud.\n\n1. Choose whether to deploy the agent on Azure Linux Virtual Machine or an existing (non-Azure) Linux Machine.\n2. If you choose to deploy on Azure Linux Virtual Machine, select the **> button** to the right to go to the **Virtual machines** screen.\n3. In the **Virtual machines** screen, select a VM and click **Connect**. Install the agent on the Azure VM.\n4. If you choose to deploy on an existing (non-Azure) Linux machine, select the **> button** to the right.\n5. On the **Direct Agent** screen, under **DOWNLOAD AND ONBOARD AGENT FOR LINUX**, copy the command and run it on your Linux machine.\n\n > **NOTE:** Make sure you configure the security settings for the machine according to your organization's security policy.",
+               "instructions": [
+                 {
+                   "parameters": {
+                     "linkType": "InstallAgentLinux",
+                     "buttonText": "Go to Virtual machines screen",
+                     "tooltip": ""
+                   },
+                   "type": "InstallAgent"
+                 },
+                 {
+                   "parameters": {
+                     "linkType": "InstallAgentLinuxNonAzure",
+                     "buttonText": "Go to Direct Agent screen",
+                     "tooltip": ""
+                   },
+                   "type": "InstallAgent"
+                 }
+               ]
+             },
+             {
+               "title": "2. Configure PingFederate logs to be collected",
+               "description": "Configure PingFederate to forward Syslog messages in CEF format to your Azure workspace via the Syslog agent.\n\n1. In PingFederate, go to Server Configuration > Log Settings.\n2. Under System Loggers, click **Syslog**.\n3. Configure the settings to forward logs to the Syslog agent, ensuring the logs are sent in CEF format.\n4. Save the changes.",
+               "instructions": []
+             },
+             {
+               "title": "3. Validate connection",
+               "description": "Follow the instructions to validate your connectivity:\n\nOpen Log Analytics to check if the logs are received using the CommonSecurityLog schema.\n\n > It may take about 20 minutes until the connection streams data to your workspace.\n\nIf the logs are not received, verify your machine connectivity, ensure the agent is running (`sudo systemctl status omsagent.service`), and check the agent logs at `/var/opt/microsoft/omsagent/<workspace_id>/log/omsagent.log`.",
+               "instructions": []
+             }
+           ],
+           "additionalRequirementBanner": "This connector depends on a parser based on Kusto Function to work as expected [**PingFederateEvent**](https://aka.ms/sentinel-PingFederate-parser) which is deployed with the Azure Sentinel Solution."
+         }
         }
-      }
     }
   ]
 }
