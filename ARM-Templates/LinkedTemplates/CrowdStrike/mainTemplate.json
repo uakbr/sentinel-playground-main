@@ -463,7 +463,49 @@
           "suppressionDuration": "PT1H",
           "suppressionEnabled": false,
           "triggerOperator": "GreaterThan",
-          "triggerThreshold": 0
+          "triggerThreshold": 0,
+          "entityMappings": [
+            {
+              "entityType": "Account",
+              "fieldMappings": [
+                {
+                  "identifier": "FullName",
+                  "columnName": "AccountCustomEntity"
+                }
+              ]
+            },
+            {
+              "entityType": "Host",
+              "fieldMappings": [
+                {
+                  "identifier": "HostName",
+                  "columnName": "HostCustomEntity"
+                }
+              ]
+            },
+            {
+              "entityType": "IP",
+              "fieldMappings": [
+                {
+                  "identifier": "Address",
+                  "columnName": "IPCustomEntity"
+                }
+              ]
+            },
+            {
+              "entityType": "FileHash",
+              "fieldMappings": [
+                {
+                  "identifier": "Algorithm",
+                  "columnName": "SHA256"
+                },
+                {
+                  "identifier": "Value",
+                  "columnName": "FileHashCustomEntity"
+                }
+              ]
+            }
+          ]
         }
       },
       {
@@ -486,7 +528,49 @@
           "suppressionDuration": "PT1H",
           "suppressionEnabled": false,
           "triggerOperator": "GreaterThan",
-          "triggerThreshold": 0
+          "triggerThreshold": 0,
+          "entityMappings": [
+            {
+              "entityType": "Account",
+              "fieldMappings": [
+                {
+                  "identifier": "FullName",
+                  "columnName": "AccountCustomEntity"
+                }
+              ]
+            },
+            {
+              "entityType": "Host",
+              "fieldMappings": [
+                {
+                  "identifier": "HostName",
+                  "columnName": "HostCustomEntity"
+                }
+              ]
+            },
+            {
+              "entityType": "IP",
+              "fieldMappings": [
+                {
+                  "identifier": "Address",
+                  "columnName": "IPCustomEntity"
+                }
+              ]
+            },
+            {
+              "entityType": "FileHash",
+              "fieldMappings": [
+                {
+                  "identifier": "Algorithm",
+                  "columnName": "SHA256"
+                },
+                {
+                  "identifier": "Value",
+                  "columnName": "FileHashCustomEntity"
+                }
+              ]
+            }
+          ]
         }
       },
       {

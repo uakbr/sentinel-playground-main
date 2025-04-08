@@ -200,6 +200,17 @@
         "triggerThreshold": 0,
         "tactics": [
           "Collection"
+        ],
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountCustomEntity"
+              }
+            ]
+          }
         ]
       }
     },
@@ -216,7 +227,7 @@
         "description": "Detects executable files in folders.",
         "displayName": "Box - Executable file in folder",
         "enabled": false,
-        "query": "BoxEvents\n| where SourceFileName hassuffix '.exe' or SourceItemName hassuffix '.exe'\n| extend IPCustomEntity = SrcIpAddr\n",
+        "query": "BoxEvents\n| where SourceFileName hassuffix '.exe' or SourceItemName hassuffix '.exe'\n| extend AccountCustomEntity = SrcUserName\n| extend IPCustomEntity = SrcIpAddr\n",
         "queryFrequency": "PT1H",
         "queryPeriod": "PT1H",
         "severity": "Medium",
@@ -226,6 +237,26 @@
         "triggerThreshold": 0,
         "tactics": [
           "InitialAccess"
+        ],
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "AccountCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity"
+              }
+            ]
+          }
         ]
       }
     },
