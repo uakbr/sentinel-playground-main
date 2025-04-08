@@ -16,27 +16,26 @@
 *   **2024-07-16:** Updated API versions in `ARM-Templates/LinkedTemplates/solutions.json`.
 *   **2024-07-16:** Attempted updates on linked solution templates (`Box`, `CiscoISE`, `CiscoUmbrella`, `CrowdStrike`). Successfully updated `Box`, `CiscoISE`, `CiscoUmbrella`, `CrowdStrike`.
 *   **2024-07-16:** Updated API version in `PowerShell/Update-DetectionRules/Update-DetectionRules.ps1` to `2023-11-01`.
+*   **2024-07-16:** Updated `README.md` to reflect modernization changes.
 
 **Blocked / Needs Review:**
 
 *   **Update Solution Deployment - Linked Templates:** Edits failed to apply correctly for `ARM-Templates/LinkedTemplates/PingFederate/mainTemplate.json` and `ARM-Templates/LinkedTemplates/Ubiquiti/mainTemplate.json`. These templates still contain outdated API versions and structure. Requires further investigation or manual correction.
-*   **Verification:** Logic in `Update-DetectionRules.ps1` needs functional testing against the updated API.
+*   **Verification - Detection Rule Script:** Logic in `Update-DetectionRules.ps1` needs functional testing against the updated API.
+*   **Verification - KQL Parsers:** Parsers in `parsers/` directory should be reviewed to ensure compatibility with all data going to `SecureHats_CL` table (most appear to use replaceable `<CustomLog>` token, but full verification recommended).
+*   **Verification - Solution Content:** Workbooks, Analytics Rules, etc., deployed via linked templates require testing for functionality after API/data structure changes.
 
 **Current:**
 
-*   Completed API update for `Update-DetectionRules.ps1`.
-*   Ready to revisit blocked solution templates.
+*   Completed primary modernization tasks.
+*   Blocked on updating `PingFederate` and `Ubiquiti` linked templates.
 
 **Next:**
 
-1.  **Revisit Blocked Solution Templates:**
-    *   Re-attempt updates for `PingFederate/mainTemplate.json`.
-    *   Re-attempt updates for `Ubiquiti/mainTemplate.json`.
-    *   If automated edits fail, document required changes for manual review.
-2.  **General Cleanup:**
-    *   *(Done)* Update `azPowerShellVersion` in Deployment Script resources.
-    *   *(Done)* Review and remove any remaining unnecessary `Start-Sleep` resources.
-    *   Update `README.md` to reflect changes.
-    *   Review KQL parsers (`*.csl`) for compatibility, especially table name references (all custom data now goes to `SecureHats_CL`). 
+1.  **Manual Review / Testing:**
+    *   Manually review and correct `PingFederate/mainTemplate.json` and `Ubiquiti/mainTemplate.json` based on changes applied to other linked templates.
+    *   Deploy the updated template to a test environment.
+    *   Verify functionality of deployed resources (data ingestion, parsers, analytics rules, workbooks).
+2.  **Refine `README.md`:** Add detailed deployment steps and usage notes based on testing.
 
 --- 
