@@ -46,13 +46,17 @@ function Update-DetectionRules {
     Write-Host $logo -ForegroundColor White
     Write-Output "Connected to Azure with subscriptionId: $($SubscriptionId)`n"
 
-    $apiVersion     = "?api-version=2021-10-01-preview"
+    # Use a stable API version
+    $stableApiVersion = "2023-11-01"
+    $apiVersionParam = "?api-version=$($stableApiVersion)"
+
     $baseUri        = "/subscriptions/${SubscriptionId}/resourceGroups/${ResourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/${WorkspaceName}"
-    $templatesUri   = "$baseUri/providers/Microsoft.SecurityInsights/alertRuleTemplates$apiVersion"
+    $templatesUri   = "$baseUri/providers/Microsoft.SecurityInsights/alertRuleTemplates$apiVersionParam"
     $alertUri       = "$baseUri/providers/Microsoft.SecurityInsights/alertRules"
 
+    # Use stable API version for GET requests
     $alertRulesTemplates = ((Invoke-AzRestMethod -Path "$($templatesUri)" -Method GET).Content | ConvertFrom-Json).value
-    $alerts = ((Invoke-AzRestMethod -Path "$($alertUri)$($apiVersion)" -Method GET).Content | ConvertFrom-Json).value
+    $alerts = ((Invoke-AzRestMethod -Path "$($alertUri)$($apiVersionParam)" -Method GET).Content | ConvertFrom-Json).value
 
     $i = 0
     foreach ($item in $alertRulesTemplates) {
@@ -60,7 +64,8 @@ function Update-DetectionRules {
             foreach ($alert in $alerts) {
                 if ($alert.properties.alertRuleTemplateName -in $item.name -or $alert.properties.displayName -eq $item.properties.displayName) {
                     Write-Verbose "$($item.properties.displayName)"
-                    $alertUriGuid = $alertUri +'/'+ $($alert.name) + $apiVersion
+                    # Use stable API version for PUT/DELETE URIs
+                    $alertUriGuid = $alertUri +'/'+ $($alert.name) + $apiVersionParam
                     $i++
                     Write-Host "Processing $($i) of $($alerts.count): $($item.properties.displayname)" -ForegroundColor Green
 
@@ -103,6 +108,7 @@ function Update-DetectionRules {
                     $alertBody | Add-Member -NotePropertyName properties -NotePropertyValue $properties
 
                     try {
+                        # Use stable API version for PUT/DELETE calls inside the loop
                         $result = Invoke-AzRestMethod -Path $alertUriGuid -Method PUT -Payload ($alertBody | ConvertTo-Json -Depth 10)
                         if ($result.statusCode -eq 400) {
                             # if the existing built-in rule was not created from a template (old versions)

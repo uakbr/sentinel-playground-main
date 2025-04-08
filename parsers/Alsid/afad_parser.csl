@@ -81,7 +81,7 @@ let CodenameTable=datatable(Codename: string, Explanation: string) [
 "Suspicious service","Before or after an exploit, malicious tools might require to create a service to gain privileges or to be executed in another context.",
 "I-ServiceInstall","Before or after an exploit, malicious tools might require to create a service to gain privileges or to be executed in another context."
 ];
-let Common = AlsidForADLog_CL
+let Common = SecureHats_CL
 | parse RawData with
                      Time:datetime  " "
                      Host:string  " "

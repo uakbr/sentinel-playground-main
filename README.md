@@ -1,70 +1,54 @@
 ![logo](./media/sh-banners.png)
 =========
 [![GitHub release](https://img.shields.io/github/release/SecureHats/Sentinel-playground.svg?style=flat-square)](https://github.com/SecureHats/Sentinel-playground/releases)
-[![Maintenance](https://img.shields.io/maintenance/yes/2023.svg?style=flat-square)]()
+[![Maintenance](https://img.shields.io/maintenance/yes/2024.svg?style=flat-square)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FSecureHats%2FSentinel-playground%2Fmain%2FARM-Templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FSecureHats%2FSentinel-playground%2Fmain%2FARM-Templates%2FUiDefinition.json)
 # Sentinel Playground
 
-The Sentinel playground is a project to deploy an initial Azure Sentinel environment pre-provisioned with sample data. 
-This to speed up the deployment for Proof of Concept and demo scenarios.
+The Sentinel playground deploys an Azure Sentinel environment pre-provisioned with sample data using modern Azure resources. This speeds up deployment for Proof of Concept and demo scenarios.
 
 #### Prerequisites
 
-- Azure user account with enough permissions. See table below.
-
-The following table summarizes permissions, licenses needed and cost to enable each Data Connector:
-
-| Provider   | Connector                                             | Custom Table                    | Parser | Workbook | Solution | Tested  |
-| ---------- | ----------------------------------------------------- | ------------------------------- | ------ | -------- | -------- | ------- |
-| Alsid      | Alsid for Active Directory (Preview)                  | AlsidForADLog_CL                |   [x]  |    [x]   |   [ ]    |   [ ]   |
-| Agari      | Agari Phishing Defense and Brand Protection (Preview) | agari_apdpolicy_log_CL          |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-|            |                                                       | agari_apdtc_log_CL              |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-|            |                                                       | agari_bpalerts_log_CL           |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Akamai     | Akamai Security Events (Preview)                      | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Aruba      | Aruba ClearPass (Preview)                             | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Cisco      | Cisco ISE Event                                       | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Cisco      | Cisco Meraki (Preview)                                | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Cisco      | Cisco UCS (Preview)                                   | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Cisco      | Cisco Umbrella (Preview)                              | Cisco_Umbrella_cloudfirewall_CL |   [x]  |    [x]   |   [x]    |   [ ]   |
-|            |                                                       | Cisco_Umbrella_dns_CL           |   [x]  |    [x]   |   [x]    |   [ ]   |
-|            |                                                       | Cisco_Umbrella_ip_CL            |   [x]  |    [x]   |   [x]    |   [ ]   |
-|            |                                                       | Cisco_Umbrella_proxy_CL         |   [x]  |    [x]   |   [x]    |   [ ]   |
-| Microsoft  | Sysmon Parser                                         | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Palo Alto  | Palo Alto Prisma Cloud (Preview)                      | PaloAltoPrismaCloudAlert_CL     |   [x]  |    [x]   |   [x]    |   [ ]   |
-| Palo Alto  | Palo Alto Prisma Cloud (Preview)                      | PaloAltoPrismaCloudAudit_CL     |   [x]  |    [x]   |   [x]    |   [ ]   |
-| Qualys     | Qualys VM KnowledgeBase (Preview)                     | QualysKB_CL                     |   [x]  |    [x]   |   [x]    |   [ ]   |
-| Qualys     | Qualys Vulnerability Management (Preview)             | QualysHostDetection_CL          |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Symantec   | Broadcom Symantec DLP (Preview)                       | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Symantec   | Symantec ProxySG (Preview)                            | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Symantec   | Symantec VIP (Preview)                                | SecureHats_CL                   |   [x]  |    [ ]   |   [ ]    |   [ ]   |
-| Ubiquiti   | Ubiquiti UniFi (Preview)                              | Ubiquiti_CL                     |   [x]  |    [x]   |   [x]    |   [ ]   |
+- An Azure user account with sufficient permissions to create resource groups, Log Analytics workspaces, Sentinel instances, managed identities, role assignments, deployment scripts, and data collection endpoints/rules.
 
 ## ARM template instructions
 
-The template performs the following tasks:
+The main ARM template (`ARM-Templates/azuredeploy.json`) performs the following tasks:
 
-- Creates resource group (if given resource group doesn't exist yet)
-- Creates Log Analytics workspace (if given workspace doesn't exist yet)
-- Installs Azure Sentinel on top of the workspace (if not installed yet)
-- Creates a temporary Azure Container Registry
-- Creates a used assigned identity for executing the deployment scripts
-- Creates a Deployment script (if given deployment script doesn't exist yet)
+- Creates a resource group (if a new one is specified).
+- Creates a Log Analytics workspace (if a new one is specified).
+- Enables Azure Sentinel on the workspace using the `Microsoft.SecurityInsights/onboardingStates` resource.
+- Configures standard data connectors for Azure Activity Log and Security Events using `Microsoft.SecurityInsights/dataConnectors`.
+- Creates a User Assigned Managed Identity for deployment scripts.
+- Creates a Data Collection Endpoint (DCE) and Data Collection Rule (DCR) for ingesting custom logs via the Logs Ingestion API.
+- Runs [ARM deployment scripts](https://docs.microsoft.com/azure/azure-resource-manager/templates/deployment-script-template) using the managed identity to:
+    - Ingest sample data (JSON files) from specified providers into the `SecureHats_CL` custom table using the Logs Ingestion API.
+    - Deploy KQL functions (`.csl` files) from the `parsers/` directory.
+    - Deploy linked templates containing Sentinel Solutions (Workbooks, Analytics Rules, etc.) from `ARM-Templates/LinkedTemplates/`.
+    - Update detection rules based on templates using `PowerShell/Update-DetectionRules/Update-DetectionRules.ps1`.
 
-In order to execute the deployment scripts, the deployment template uses an [ARM deployment script](https://docs.microsoft.com/azure/azure-resource-manager/templates/deployment-script-template) which requires a [user assigned identity](https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview). You will see this resource in your resource group when the deployment finishes. You can remove after depployment if desired.
+**Note:** The deployment script uses the managed identity for authentication against the Logs Ingestion API and Azure Resource Manager, removing the need for workspace keys or interactive logins during deployment.
 
-It takes around **10 minutes** to before that sample data is visible.
+Sample data ingestion now targets the `SecureHats_CL` table via a Data Collection Rule. Parsers originally written for other specific custom tables (e.g., `AlsidForADLog_CL`, `agari_apdpolicy_log_CL`) may need updating.
 
-## Supported Providers
-- Aruba 
-- Cisco
-- Symantec
+Initial data ingestion and deployment can take around **10-15 minutes**.
 
-## ToDo
-- Add more data providers
-- Add more parsers
-- Clean-up Deployment Scripts
-- Enables analytics rules for selected Microsoft 1st party products 
-- Enables Fusion rule and ML Behavior Analytics rules for RDP or SSH (if Security Events or Syslog data sources are selected)
-- Enables Scheduled analytics rules that apply to all the enabled connectors 
+## Current Status & ToDo
+
+This repository has undergone modernization efforts (as of July 2024) to update deprecated resources and APIs.
+
+**Completed Updates:**
+- Updated core ARM template (`azuredeploy.json`) with modern API versions and resource types (Sentinel onboarding, standard connectors).
+- Replaced legacy Data Collector API with modern Logs Ingestion API (DCE/DCR) in `azuredeploy.json` and `Add-AzureMonitorData.ps1`.
+- Updated API versions in `Update-DetectionRules.ps1`.
+- Updated API versions in `solutions.json` and several linked solution templates (`Box`, `CiscoISE`, `CiscoUmbrella`, `CrowdStrike`).
+- Removed legacy `Start-Sleep` dependencies where possible.
+
+**Remaining ToDo / Areas for Review:**
+- **Linked Template Updates:** The `PingFederate` and `Ubiquiti` solution templates (`ARM-Templates/LinkedTemplates/.../mainTemplate.json`) require further review and updates for API versions and resource types. Automated updates failed for these.
+- **KQL Parser Compatibility:** Review `.csl` files in `parsers/`. Ensure they function correctly with all data now landing in `SecureHats_CL` instead of potentially different custom tables.
+- **Solution Content Verification:** Verify that workbooks, analytics rules, and other content deployed by the linked templates function correctly with the updated APIs and data structures.
+- **Deployment Script Logic:** Review the logic within `Add-AzureMonitorData.ps1` and `Update-DetectionRules.ps1` for potential improvements or adjustments needed after API changes.
+- **README Updates:** Further refine this README with more detailed usage instructions and notes on the updated architecture.

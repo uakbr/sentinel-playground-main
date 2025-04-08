@@ -139,17 +139,18 @@
     }
   },
   "variables": {
-    "workbook-source": "[concat(resourceGroup().id, '/providers/Microsoft.OperationalInsights/workspaces/',parameters('workspace'))]",
-    "_workbook-source": "[variables('workbook-source')]",
-    "connector1-source": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.OperationalInsights/workspaces/',parameters('workspace'),'/providers/Microsoft.SecurityInsights/dataConnectors/',parameters('connector1-name'))]",
-    "_connector1-source": "[variables('connector1-source')]",
-    "workspace-dependency": "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]"
+    "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+    "deploymentApiVersion": "2022-09-01",
+    "workbookApiVersion": "2022-04-01",
+    "alertRuleApiVersion": "2023-11-01",
+    "dataConnectorApiVersion": "2023-11-01",
+    "savedSearchApiVersion": "2022-10-01"
   },
   "resources": [
     {
       "name": "pid-27c21a58-52bf-474d-816c-2f0a4c59b39d-partnercenter",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-10-01",
+      "apiVersion": "[variables('deploymentApiVersion')]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -164,21 +165,27 @@
       "name": "[parameters('workbook1-id')]",
       "location": "[parameters('workspace-location')]",
       "kind": "shared",
-      "apiVersion": "2020-02-12",
+      "apiVersion": "[variables('workbookApiVersion')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "displayName": "[concat(parameters('workbook1-name'), ' - ', parameters('formattedTimeNow'))]",
         "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"**NOTE**: This workbook depends on a parser based on a Kusto Function to work as expected [**UbiquitiAuditEvent**](https://aka.ms/sentinel-UbiquitiUnifi-parser) which is deployed with the Azure Sentinel Solution.\"},\"name\":\"text - 2\"},{\"type\":9,\"content\":{\"version\":\"KqlParameterItem/1.0\",\"parameters\":[{\"id\":\"dc2f97cf-131b-415b-9871-b1eb9579513c\",\"version\":\"KqlParameterItem/1.0\",\"name\":\"TimeRange\",\"type\":4,\"isRequired\":true,\"value\":{\"durationMs\":604800000},\"typeSettings\":{\"selectableValues\":[{\"durationMs\":1800000},{\"durationMs\":3600000},{\"durationMs\":43200000},{\"durationMs\":86400000},{\"durationMs\":604800000},{\"durationMs\":2592000000},{\"durationMs\":7776000000}]},\"timeContext\":{\"durationMs\":86400000}}],\"style\":\"pills\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"name\":\"parameters - 3\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| make-series TotalEvents = count() default = 0 on TimeGenerated from {TimeRange:start} to {TimeRange:end} step {TimeRange:grain};\\r\\n\",\"size\":0,\"title\":\"Events over time\",\"color\":\"greenDark\",\"timeContext\":{\"durationMs\":604800000},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"linechart\"},\"name\":\"query - 2\"}]},\"customWidth\":\"50\",\"name\":\"group - 1\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\n| where isnotempty(EventCategory)\\n| summarize TotalEvents = count() by EventCategory\\n| order by TotalEvents\",\"size\":3,\"title\":\"Total events by Category\",\"timeContext\":{\"durationMs\":604800000},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"tiles\",\"tileSettings\":{\"showBorder\":false,\"titleContent\":{\"columnMatch\":\"EventCategory\",\"formatter\":1},\"leftContent\":{\"columnMatch\":\"TotalEvents\",\"formatter\":12,\"formatOptions\":{\"palette\":\"auto\"},\"numberFormat\":{\"unit\":17,\"options\":{\"maximumSignificantDigits\":3,\"maximumFractionDigits\":2}}}}},\"customWidth\":\"60\",\"name\":\"query - 2\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where EventCategory == 'firewall'\\r\\n| summarize count() by DvcAction\",\"size\":3,\"title\":\"Firewall actions\",\"timeContext\":{\"durationMs\":604800000},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\",\"tileSettings\":{\"showBorder\":false,\"titleContent\":{\"columnMatch\":\"DvcAction\",\"formatter\":1},\"leftContent\":{\"columnMatch\":\"count_\",\"formatter\":12,\"formatOptions\":{\"palette\":\"auto\"},\"numberFormat\":{\"unit\":17,\"options\":{\"maximumSignificantDigits\":3,\"maximumFractionDigits\":2}}}}},\"customWidth\":\"40\",\"name\":\"query - 1\"}]},\"customWidth\":\"50\",\"name\":\"group - 2\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where isnotempty(SrcIpAddr)\\r\\n| summarize count() by SrcIpAddr\",\"size\":3,\"title\":\"Top sources\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"25\",\"name\":\"query - 4\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where isnotempty(DstIpAddr)\\r\\n| summarize count() by DstIpAddr\",\"size\":3,\"title\":\"Top destinations\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"25\",\"name\":\"query - 5\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"let src_mac = UbiquitiAuditEvent\\r\\n| where isnotempty(SrcMacAddr)\\r\\n| summarize TotalEvents = count() by SrcMacAddr\\r\\n| project TotalEvents, MacAddress = SrcMacAddr;\\r\\nlet dst_mac = UbiquitiAuditEvent\\r\\n| where isnotempty(DstMacAddr)\\r\\n| summarize TotalEvents = count() by DstMacAddr\\r\\n| project TotalEvents, MacAddress = DstMacAddr;\\r\\nunion src_mac, dst_mac\\r\\n| summarize Events = sum(TotalEvents) by MacAddress\\r\\n\",\"size\":3,\"title\":\"Top devices (MacAddress)\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"25\",\"name\":\"query - 6\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where isnotempty(NetworkRuleName)\\r\\n| summarize Count = count() by NetworkRuleName\\r\\n| top 10 by Count\",\"size\":0,\"title\":\"Top 10 Firewall rules\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"customWidth\":\"20\",\"name\":\"query - 3\"}]},\"name\":\"group - 3\"},{\"type\":12,\"content\":{\"version\":\"NotebookGroup/1.0\",\"groupType\":\"editable\",\"items\":[{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where isnotempty(DstPortNumber)\\r\\n| where ipv4_is_private(DstIpAddr)\\r\\n| extend svc_name = case(DstPortNumber in ('20', '21'), 'FTP',\\r\\n                         DstPortNumber == '22', 'SSH',\\r\\n                         DstPortNumber == '23', 'Telnet',\\r\\n                         DstPortNumber == '25', 'SMTP',\\r\\n                         DstPortNumber == '53', 'DNS',\\r\\n                         DstPortNumber in ('67', '68'), 'DHCP',\\r\\n                         DstPortNumber == '110', 'POP3',\\r\\n                         DstPortNumber == '123', 'NTP',\\r\\n                         DstPortNumber in ('137', '138', '139'), 'NeTBIOS',\\r\\n                         DstPortNumber == '143', 'IMAP',\\r\\n                         DstPortNumber == '220', 'IMAPv3',\\r\\n                         DstPortNumber == '389', 'LDAP',\\r\\n                         DstPortNumber == '3389', 'RDP',\\r\\n                         DstPortNumber == '514', 'Syslog',\\r\\n                         DstPortNumber == '80', 'HTTP',\\r\\n                         DstPortNumber == '443', 'HTTPS',\\r\\n                         'Other' )\\r\\n| summarize Events = count() by svc_name\\r\\n| project Events, Service = svc_name\",\"size\":3,\"title\":\"Top internal services\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"barchart\"},\"customWidth\":\"40\",\"name\":\"query - 1\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where isnotempty(DstPortNumber)\\r\\n| where ipv4_is_private(DstIpAddr) == 'False'\\r\\n| extend svc_name = case(DstPortNumber in ('20', '21'), 'FTP',\\r\\n                         DstPortNumber == '22', 'SSH',\\r\\n                         DstPortNumber == '23', 'Telnet',\\r\\n                         DstPortNumber == '25', 'SMTP',\\r\\n                         DstPortNumber == '53', 'DNS',\\r\\n                         DstPortNumber in ('67', '68'), 'DHCP',\\r\\n                         DstPortNumber == '110', 'POP3',\\r\\n                         DstPortNumber == '123', 'NTP',\\r\\n                         DstPortNumber in ('137', '138', '139'), 'NeTBIOS',\\r\\n                         DstPortNumber == '143', 'IMAP',\\r\\n                         DstPortNumber == '220', 'IMAPv3',\\r\\n                         DstPortNumber == '389', 'LDAP',\\r\\n                         DstPortNumber == '3389', 'RDP',\\r\\n                         DstPortNumber == '514', 'Syslog',\\r\\n                         DstPortNumber == '80', 'HTTP',\\r\\n                         DstPortNumber == '443', 'HTTPS',\\r\\n                         'Other' )\\r\\n| summarize Events = count() by svc_name\\r\\n| project Events, Service = svc_name\",\"size\":3,\"title\":\"Top external services\",\"timeContext\":{\"durationMs\":0},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"barchart\"},\"customWidth\":\"40\",\"name\":\"query - 2\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"UbiquitiAuditEvent\\r\\n| where isnotempty(DnsQuery)\\r\\n| extend replaced = replace(@'(.*)\\\\.$', @'\\\\1', DnsQuery)\\r\\n| extend Domain = extract(@'([^\\\\.](\\\\w+)\\\\.\\\\w+)$', 1, replaced)\\r\\n| summarize TotalRequests = count() by Domain\",\"size\":3,\"title\":\"Top domains\",\"timeContext\":{\"durationMs\":604800000},\"timeContextFromParameter\":\"TimeRange\",\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"table\",\"gridSettings\":{\"filter\":true}},\"customWidth\":\"20\",\"name\":\"query - 0\"}]},\"name\":\"group - 5\"}],\"fromTemplateId\":\"sentinel-UbiquitiUniFiWorkbook\",\"$schema\":\"https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json\"}\r\n",
         "version": "1.0",
-        "sourceId": "[variables('_workbook-source')]",
+        "sourceId": "[variables('workspaceResourceId')]",
         "category": "sentinel"
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic1-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic1-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects connections which may indicate that device is infected with cryptominer.",
         "displayName": "Ubiquiti - Possible connection to cryptominning pool",
@@ -197,11 +204,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic2-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic2-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects allowed connections to IP addresses which are in TI list and are known to be malicious.",
         "displayName": "Ubiquiti - Connection to known malicious IP or C2",
@@ -221,11 +231,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic3-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic3-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects local to remote (L2R) FTP connections.",
         "displayName": "Ubiquiti - Unusual FTP connection to external server",
@@ -244,11 +257,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic4-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic4-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects large ICMP packets to external host.",
         "displayName": "Ubiquiti - Large ICMP to external server",
@@ -268,11 +284,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic5-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic5-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects connections to non-corporate DNS servers.",
         "displayName": "Ubiquiti - connection to non-corporate DNS server",
@@ -292,11 +311,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic6-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic6-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects unusual remote to local (R2L) DNS connections.",
         "displayName": "Ubiquiti - Unusual DNS connection",
@@ -315,11 +337,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic7-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic7-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects remote to local (R2L) RDP connection.",
         "displayName": "Ubiquiti - RDP from external source",
@@ -338,11 +363,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic8-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic8-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects remote to local (R2L) SSH connection to internal host.",
         "displayName": "Ubiquiti - SSH from external source",
@@ -361,11 +389,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic9-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic9-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects when device with unseen MAC Address joined AP.",
         "displayName": "Ubiquiti - Unknown MAC Joined AP",
@@ -384,11 +415,14 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('analytic10-id'))]",
-      "apiVersion": "2020-01-01",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "[variables('alertRuleApiVersion')]",
+      "name": "[parameters('analytic10-id')]",
       "kind": "Scheduled",
       "location": "[parameters('workspace-location')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "description": "Detects unusual traffic masking as HTTP(S).",
         "displayName": "Ubiquiti - Unusual traffic",
@@ -407,11 +441,220 @@
       }
     },
     {
-      "id": "[variables('_connector1-source')]",
-      "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',parameters('connector1-name'))]",
-      "apiVersion": "2021-03-01-preview",
-      "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/UbiquitiAuditEvent')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "UbiquitiAuditEvent",
+        "category": "SecureHats",
+        "functionAlias": "UbiquitiAuditEvent",
+        "query": "\nlet EventData = Ubiquiti_CL\n| extend EventVendor = 'Ubiquiti'\n| extend EventTime = extract(@'\\<\\d+\\>(.*)\\s\\w+,[A-Fa-f0-9]{12}', 1, Message)\n| extend DvcType = extract(@'\\d+\\:\\d+\\:\\d+\\s(\\w+),[A-Fa-f0-9]{12}' , 1, Message)\n| extend DvcMacAddr = replace(@'(:)$', @'', replace(@'(\\w{2})', @'\\1:', extract(@',([A-Fa-f0-9]{12}),v' , 1, Message)))\n| extend FirmwareVersion = extract(@'[A-Fa-f0-9]{12},v(.*?)\\:', 1, Message);\nlet ubiquiti_dropbear_events =() {\nEventData\n| where Message contains 'dropbear'\n| extend EventCategory = 'dropbear'\n| extend EventMessage = extract(@' dropbear\\[\\d+\\]\\:\\s(.*)', 1, Message)\n| extend SrcIpAddr = extract(@'from (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\:\\d{1,5}', 1, Message)\n| extend SrcPortNumber = extract(@'from \\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\:(\\d{1,5})', 1, Message)\n};\nlet ubiquiti_hostapd_events =() {\nEventData\n| where Message contains 'hostapd'\n| extend EventCategory = 'hostapd'\n| extend WlanId = extract(@'hostapd:\\s(\\w+)\\s', 1, Message)\n| extend SrcType = extract(@':\\s(\\w+)\\s[A-Fa-f0-9:]{17}', 1, Message)\n| extend SrcMacAddr = extract(@':\\s(\\w+)\\s([A-Fa-f0-9:]{17})', 2, Message)\n| extend DstMacAddr = extract(@'addr=([a-fA-F0-9:]{17})', 1, Message)\n| extend Service = extract(@'[A-Fa-f0-9:]{17}\\s(.+):', 2, Message)\n| extend EventMessage = extract(@'[A-Fa-f0-9:]{17}\\s(.*):\\s(.*)', 2, Message)\n};\nlet ubiquiti_firewall_events =() {\nEventData\n| where Message matches regex @'kernel:\\s+\\[\\S+-\\w\\]'\n| extend EventCategory = 'firewall'\n| extend FlowId = extract(@'ID=(.*?)\\s', 1, Message)\n| extend DvcInboundInterface = extract(@'IN=(.*?)\\s', 1, Message)\n| extend DvcOutboundInterface = extract(@'OUT=(.*?)\\s', 1, Message)\n| extend dvc_action = extract(@'kernel:\\s+\\[\\S+-(\\w)\\]', 1, Message)\n| extend DvcAction = case(dvc_action == \"A\", \"Accepted\",\n                          dvc_action == \"B\", \"Blocked\",\n                          dvc_action == \"R\", \"Rejected\",\n                          \"Other\")\n| extend NetworkRuleName = extract(@'kernel:\\s+\\[(\\S+)-\\w\\]', 1, Message)\n| extend DstMacAddr = extract(@'MAC=([a-fA-F0-9:]{17}):', 1, Message)\n| extend SrcMacAddr = extract(@'MAC=[a-fA-F0-9:]{17}:([a-fA-F0-9:]{17})\\s', 1, Message)\n| extend SrcIpAddr = extract(@'SRC=(.*?)\\s', 1, Message)\n| extend SrcPortNumber = extract(@'SPT=(.*?)\\s', 1, Message)\n| extend DstIpAddr = extract(@'DST=(.*?)\\s', 1, Message)\n| extend DstPortNumber = extract(@'DPT=(.*?)\\s', 1, Message)\n| extend NetworkBytes = extract(@'LEN=(.*?)\\s', 1, Message)\n| extend Tos = extract(@'TOS=(.*?)\\s', 1, Message)\n| extend Prec = extract(@'PREC=(.*?)\\s', 1, Message)\n| extend Ttl = extract(@'TTL=(.*?)\\s', 1, Message)\n| extend NetworkProtocol = extract(@'PROTO=(.*?)\\s', 1, Message)\n| extend Window = extract(@'WINDOW=(.*?)\\s', 1, Message)\n| extend Res = extract(@'RES=(.*?)\\s', 1, Message)\n| extend Mark = extract(@'MARK=(.*?)\\s', 1, Message)\n};\nlet ubiquiti_dns_timeout_events =() {\nEventData\n| where Message contains \"DNS request timed out\"\n| extend EventMessage = 'DNS request timed out'\n| extend SrcType = extract(@'\\[(\\w+):\\s[a-fA-F0-9:]{17}\\]', 1, Message)\n| extend DvcMacAddr = extract(@'\\[\\w+:\\s([a-fA-F0-9:]{17})\\]', 1, Message)\n| extend DnsQuery = extract(@'QUERY:(.*?)\\]', 1, Message)\n| extend DnsServer = extract(@'DNS_SERVER(\\s)?:(.*?)\\]', 1, Message)\n};\nlet ubiquiti_stahtd_events =() {\nEventData\n| where Message contains 'stahtd'\n| extend EventCategory = extract(@'\\\"message_type\\\":\\\"(.*?)\\\"', 1, Message)\n| extend SrcDvcMacAddr = extract(@'\\\"mac\\\":\\\"(.*?)\\\"', 1, Message)\n| extend WlanId = extract(@'\\\"vap\\\":\\\"(.*?)\\\"', 1, Message)\n| extend AssocStatus = extract(@'\\\"assoc_status\\\":\\\"(.*?)\\\"', 1, Message)\n| extend EventResult = extract(@'\\\"event_type\\\":\\\"(.*?)\\\"', 1, Message)\n| extend EventMessage = extract(@'\\}\\s-\\s(.*)', 1, Message)\n};\nlet ubiquiti_EVT_AP_STA_ASSOC_TRACKER_DBG =() {\nEventData\n| where Message contains 'libubnt'\n| where Message contains 'EVT_AP_STA_ASSOC_TRACKER_DBG'\n| extend EventCategory = 'libubnt'\n| extend WlanId = extract(@'vap:\\s(.*?)', 1, Message)\n| extend SrcMacAddr = extract(@'sta_mac:\\s(.*?)', 1, Message)\n| extend EventResult = extract(@'event_type:\\s(.*)', 1, Message)\n| extend EventMessage = 'Client failed to associate with an AP'\n};\nlet ubiquiti_EVENT_STA_ =() {\nEventData\n| where Message contains 'libubnt'\n| where Message contains 'EVENT_STA_'\n| extend EventCategory = 'libubnt'\n| extend WlanId = extract(@'EVENT_STA_(JOIN|LEAVE|IP)\\s(\\w+):', 2, Message)\n| extend DvcAction = extract(@'EVENT_STA_(JOIN|LEAVE|IP)', 1, Message)\n| extend EventMessage = case(DvcAction == 'JOIN', 'Client joined AP',\n                             DvcAction == 'LEAVE', 'Client disconnected from AP',\n                             'Client IP info')\n| extend SrcMacAddr = extract(@':\\s([A-Fa-f0-9:]{17})', 1, Message)\n| extend SrcIpAddr = extract(@'\\/\\s(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', 1, Message)\n};\nlet ubiquiti_syswrapper_events =() {\nEventData\n| where Message contains 'syswrapper'\n| extend EventCategory = 'syswrapper'\n| extend EventMessage = extract(@'syswrapper:\\s(.*)', 1, Message)\n};\nlet ubiquiti_logread_events =() {\nEventData\n| where Message contains 'logread'\n| extend EventCategory = 'logread'\n| extend DstIpAddr = extract(@'to\\s(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', 1, Message)\n| extend DstPortNumber = extract(@'\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}:(\\d{1,5})', 1, Message)\n| extend EventMessage = extract(@'logread\\[\\d+\\]:\\s(.*)', 1, Message)\n};\nlet ubiquiti_stamgr_events =() {\nEventData\n| where Message contains'stamgr'\n| extend EventCategory = 'stamgr'\n| extend DstMacAddr = extract(@'\\s([A-Fa-f0-9:]{17})', 1, Message)\n| extend WlanId = extract(@'\\s[A-Fa-f0-9:]{17}\\s(\\S+)', 1, Message)\n| extend EventMessage = extract(@'stamgr:(.*?)\\(', 1, Message)\n| extend EventResultDetails = extract(@'reason:(.*?)\\)', 1, Message)\n};\nlet ubiquiti_kernel_events =() {\nEventData\n| where Message contains 'kernel'\n| where Message contains 'FWLOG' or Message contains 'set_ratelimit'\n| extend EventCategory = 'kernel'\n| extend EventMessage = case(Message matches regex \"kernel.*FWLOG\", extract(@'FWLOG:\\s\\[\\d+\\]\\s(.*)', 1, Message),\n                             Message matches regex \"kernel.*_set_ratelimit\", extract(@'_set_ratelimit:\\s(.*)', 1, Message),\n                             \"Check raw_message for details\")\n};\nlet ubiquiti_dns_events =() {\nEventData\n| where Message matches regex @'dnsmasq\\[\\d+\\]:'\n| extend DstMacAddr = extract(@'MAC=([a-fA-F0-9:]{17}):', 1, Message)\n| extend SrcMacAddr = extract(@'MAC=[a-fA-F0-9:]{17}:([a-fA-F0-9:]{17})\\s', 1, Message) \n| extend DnsQuery = extract(@'dnsmasq\\[\\d+\\]:\\s(.*?)\\[\\w+\\]|\\s(\\S+)\\sfrom\\s\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', 2, Message)\n| extend SrcIpAddr = extract(@'dnsmasq\\[\\d+\\]:\\s(.*?)\\[\\w+\\]|\\s(.*?)from\\s(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', 3, Message)\n};\nunion isfuzzy=true ubiquiti_dropbear_events, ubiquiti_hostapd_events, ubiquiti_firewall_events, ubiquiti_dns_timeout_events, ubiquiti_stahtd_events, ubiquiti_EVT_AP_STA_ASSOC_TRACKER_DBG, ubiquiti_EVENT_STA_, ubiquiti_syswrapper_events, ubiquiti_logread_events, ubiquiti_stamgr_events, ubiquiti_kernel_events, ubiquiti_dns_events\n| project TimeGenerated\n        , EventVendor\n        , EventTime\n        , EventCategory\n        , DvcType\n        , DvcMacAddr\n        , FirmwareVersion\n        , EventMessage\n        , WlanId\n        , SrcType\n        , Service\n        , FlowId\n        , DvcInboundInterface\n        , DvcOutboundInterface\n        , DvcAction\n        , NetworkRuleName\n        , SrcMacAddr\n        , SrcIpAddr\n        , SrcPortNumber\n        , DstMacAddr\n        , DstIpAddr\n        , DstPortNumber\n        , NetworkBytes\n        , Tos\n        , Prec\n        , Ttl\n        , NetworkProtocol\n        , Window\n        , Res\n        , Mark\n        , DnsQuery\n        , DnsServer\n        , SrcDvcMacAddr\n        , AssocStatus\n        , EventResult\n        , EventResultDetails\n        , Message\n",
+        "version": 1
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 1')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - DNS requests timed out",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where isnotempty(DnsQuery)\n| where EventMessage =~ 'DNS request timed out'\n| extend Name = DnsQuery\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows failed DNS requests due to timeout." },
+          { "name": "tactics", "value": "CommandAndControl,Exfiltration" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 2')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Hidden internal DNS server",
+        "category": "Hunting Queries",
+        "query": "let threshold = 100;\nUbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where ipv4_is_private(DstIpAddr)\n| where DvcAction =~ 'Accepted'\n| where DstPortNumber == '53'\n| summarize count() by DstIpAddr\n| where count_ > threshold\n| extend IPCustomEntity = DstIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of unaccounted internal DNS servers." },
+          { "name": "tactics", "value": "CommandAndControl" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 3')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Rare internal ports",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where ipv4_is_private(DstIpAddr)\n| where DvcAction =~ 'Accepted'\n| where isnotempty(DstPortNumber)\n| summarize count() by DstPortNumber, DstIpAddr\n| top 10 by count_ asc\n  | extend IPCustomEntity = DstIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of least used internal destination ports." },
+          { "name": "tactics", "value": "CommandAndControl" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 4')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Top blocked destinations",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| summarize count() by DstIpAddr\n| top 10 by count_\n| extend IPCustomEntity = DstIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of top destinations connections to which were blocked by firewall." },
+          { "name": "tactics", "value": "CommandAndControl,Exfiltration" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 5')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Top blocked external services",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| where isnotempty(DstPortNumber)\n| where ipv4_is_private(DstIpAddr) == 'False'\n| extend svc_name = case(DstPortNumber in ('20', '21'), 'FTP',\n                        DstPortNumber == '22', 'SSH',\n                        DstPortNumber == '23', 'Telnet',\n                        DstPortNumber == '25', 'SMTP',\n                        DstPortNumber == '53', 'DNS',\n                        DstPortNumber in ('67', '68'), 'DHCP',\n                        DstPortNumber == '110', 'POP3',\n                        DstPortNumber == '123', 'NTP',\n                        DstPortNumber in ('137', '138', '139'), 'NeTBIOS',\n                        DstPortNumber == '143', 'IMAP',\n                        DstPortNumber == '220', 'IMAPv3',\n                        DstPortNumber == '389', 'LDAP',\n                        DstPortNumber == '3389', 'RDP',\n                        DstPortNumber == '514', 'Syslog',\n                        DstPortNumber == '80', 'HTTP',\n                        DstPortNumber == '443', 'HTTPS',\n                        DstPortNumber )\n| summarize count() by svc_name, SrcIpAddr\n| top 10 by count_\n| extend IPCustomEntity = SrcIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of top blocked connections to external services." },
+          { "name": "tactics", "value": "CommandAndControl,Exfiltration" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 6')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Top blocked internal services",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| where isnotempty(DstPortNumber)\n| where ipv4_is_private(DstIpAddr)\n| extend svc_name = case(DstPortNumber in ('20', '21'), 'FTP',\n                        DstPortNumber == '22', 'SSH',\n                        DstPortNumber == '23', 'Telnet',\n                        DstPortNumber == '25', 'SMTP',\n                        DstPortNumber == '53', 'DNS',\n                        DstPortNumber in ('67', '68'), 'DHCP',\n                        DstPortNumber == '110', 'POP3',\n                        DstPortNumber == '123', 'NTP',\n                        DstPortNumber in ('137', '138', '139'), 'NeTBIOS',\n                        DstPortNumber == '143', 'IMAP',\n                        DstPortNumber == '220', 'IMAPv3',\n                        DstPortNumber == '389', 'LDAP',\n                        DstPortNumber == '3389', 'RDP',\n                        DstPortNumber == '514', 'Syslog',\n                        DstPortNumber == '80', 'HTTP',\n                        DstPortNumber == '443', 'HTTPS',\n                        DstPortNumber )\n| summarize count() by svc_name, SrcIpAddr\n| top 10 by count_\n| extend IPCustomEntity = SrcIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of top blocked connections to internal services." },
+          { "name": "tactics", "value": "InitialAccess,CommandAndControl" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 7')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Top blocked sources",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| summarize count() by SrcIpAddr\n| top 10 by count_\n| extend IPCustomEntity = SrcIpAddr\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of top sources with blocked connections." },
+          { "name": "tactics", "value": "CommandAndControl,Exfiltration" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 8')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Top firewall rules",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| summarize count() by NetworkRuleName\n| top 10 by count_\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows list of top triggered firewall rules." },
+          { "name": "tactics", "value": "CommandAndControl,Exfiltration" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 9')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Unusual number of subdomains for top level domain (TLD)",
+        "category": "Hunting Queries",
+        "query": "let threshold = 100;\nUbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where isnotempty(DnsQuery)\n| extend replaced = replace(@'\\.$', @'', DnsQueryName)\n| extend Domain = extract(@'.*\\.(.*\\.[a-z]+)', 1, replaced)\n| extend fqdn = extract(@'(.*)\\..*\\.[a-z]+', 1, replaced)\n| summarize FQDNs = dcount(fqdn) by Domain\n| where FQDNs > threshold\n| extend HostCustomEntity = Domain\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query counts the number of unique subdomains for each TLD." },
+          { "name": "tactics", "value": "CommandAndControl" }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "[variables('savedSearchApiVersion')]",
+      "name": "[concat(parameters('workspace'), '/Ubiquiti Hunting Query 10')]",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
+      "properties": {
+        "eTag": "*",
+        "displayName": "Ubiquiti - Rejected DNS query",
+        "category": "Hunting Queries",
+        "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Rejected'\n| summarize count() by DnsQuery\n| top 10 by count_\n| extend IPCustomEntity = DnsQuery\n",
+        "version": 1,
+        "tags": [
+          { "name": "description", "value": "Query shows rejected DNS query events." },
+          { "name": "tactics", "value": "CommandAndControl" }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('connector1-name')]",
+      "type": "Microsoft.SecurityInsights/dataConnectors",
+      "apiVersion": "[variables('dataConnectorApiVersion')]",
+      "location": "[parameters('workspace-location')]",
       "kind": "GenericUI",
+      "dependsOn": [
+        "[variables('workspaceResourceId')]"
+      ],
       "properties": {
         "connectorUiConfig": {
           "title": "Ubiquiti UniFi",
@@ -572,280 +815,6 @@
           "additionalRequirementBanner": "This data connector depends on a parser based on a Kusto Function to work as expected [**UbiquitiAuditEvent**](https://aka.ms/sentinel-UbiquitiUnifi-parser) which is deployed with the Azure Sentinel Solution."
         }
       }
-    },
-    {
-      "type": "Microsoft.OperationalInsights/workspaces",
-      "apiVersion": "2020-08-01",
-      "name": "[parameters('workspace')]",
-      "location": "[parameters('workspace-location')]",
-      "resources": [
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "UbiquitiAuditEvent",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "UbiquitiAuditEvent",
-            "category": "SecureHats",
-            "functionAlias": "UbiquitiAuditEvent",
-            "query": "\nlet EventData = Ubiquiti_CL\n| extend EventVendor = 'Ubiquiti'\n| extend EventTime = extract(@'\\<\\d+\\>(.*)\\s\\w+,[A-Fa-f0-9]{12}', 1, Message)\n| extend DvcType = extract(@'\\d+\\:\\d+\\:\\d+\\s(\\w+),[A-Fa-f0-9]{12}' , 1, Message)\n| extend DvcMacAddr = replace(@'(:)$', @'', replace(@'(\\w{2})', @'\\1:', extract(@',([A-Fa-f0-9]{12}),v' , 1, Message)))\n| extend FirmwareVersion = extract(@'[A-Fa-f0-9]{12},v(.*?)\\:', 1, Message);\nlet ubiquiti_dropbear_events =() {\nEventData\n| where Message contains 'dropbear'\n| extend EventCategory = 'dropbear'\n| extend EventMessage = extract(@' dropbear\\[\\d+\\]\\:\\s(.*)', 1, Message)\n| extend SrcIpAddr = extract(@'from (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\:\\d{1,5}', 1, Message)\n| extend SrcPortNumber = extract(@'from \\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\:(\\d{1,5})', 1, Message)\n};\nlet ubiquiti_hostapd_events =() {\nEventData\n| where Message contains 'hostapd'\n| extend EventCategory = 'hostapd'\n| extend WlanId = extract(@'hostapd:\\s(\\w+)\\s', 1, Message)\n| extend SrcType = extract(@':\\s(\\w+)\\s[A-Fa-f0-9:]{17}', 1, Message)\n| extend SrcMacAddr = extract(@':\\s(\\w+)\\s([A-Fa-f0-9:]{17})', 2, Message)\n| extend DstMacAddr = extract(@'addr=([a-fA-F0-9:]{17})', 1, Message)\n| extend Service = extract(@'[A-Fa-f0-9:]{17}\\s(.+):', 2, Message)\n| extend EventMessage = extract(@'[A-Fa-f0-9:]{17}\\s(.*):\\s(.*)', 2, Message)\n};\nlet ubiquiti_firewall_events =() {\nEventData\n| where Message matches regex @'kernel:\\s+\\[\\S+-\\w\\]'\n| extend EventCategory = 'firewall'\n| extend FlowId = extract(@'ID=(.*?)\\s', 1, Message)\n| extend DvcInboundInterface = extract(@'IN=(.*?)\\s', 1, Message)\n| extend DvcOutboundInterface = extract(@'OUT=(.*?)\\s', 1, Message)\n| extend dvc_action = extract(@'kernel:\\s+\\[\\S+-(\\w)\\]', 1, Message)\n| extend DvcAction = case(dvc_action == \"A\", \"Accepted\",\n                          dvc_action == \"B\", \"Blocked\",\n                          dvc_action == \"R\", \"Rejected\",\n                          \"Other\")\n| extend NetworkRuleName = extract(@'kernel:\\s+\\[(\\S+)-\\w\\]', 1, Message)\n| extend DstMacAddr = extract(@'MAC=([a-fA-F0-9:]{17}):', 1, Message)\n| extend SrcMacAddr = extract(@'MAC=[a-fA-F0-9:]{17}:([a-fA-F0-9:]{17})\\s', 1, Message)\n| extend SrcIpAddr = extract(@'SRC=(.*?)\\s', 1, Message)\n| extend SrcPortNumber = extract(@'SPT=(.*?)\\s', 1, Message)\n| extend DstIpAddr = extract(@'DST=(.*?)\\s', 1, Message)\n| extend DstPortNumber = extract(@'DPT=(.*?)\\s', 1, Message)\n| extend NetworkBytes = extract(@'LEN=(.*?)\\s', 1, Message)\n| extend Tos = extract(@'TOS=(.*?)\\s', 1, Message)\n| extend Prec = extract(@'PREC=(.*?)\\s', 1, Message)\n| extend Ttl = extract(@'TTL=(.*?)\\s', 1, Message)\n| extend NetworkProtocol = extract(@'PROTO=(.*?)\\s', 1, Message)\n| extend Window = extract(@'WINDOW=(.*?)\\s', 1, Message)\n| extend Res = extract(@'RES=(.*?)\\s', 1, Message)\n| extend Mark = extract(@'MARK=(.*?)\\s', 1, Message)\n};\nlet ubiquiti_dns_timeout_events =() {\nEventData\n| where Message contains \"DNS request timed out\"\n| extend EventMessage = 'DNS request timed out'\n| extend SrcType = extract(@'\\[(\\w+):\\s[a-fA-F0-9:]{17}\\]', 1, Message)\n| extend DvcMacAddr = extract(@'\\[\\w+:\\s([a-fA-F0-9:]{17})\\]', 1, Message)\n| extend DnsQuery = extract(@'QUERY:(.*?)\\]', 1, Message)\n| extend DnsServer = extract(@'DNS_SERVER(\\s)?:(.*?)\\]', 1, Message)\n};\nlet ubiquiti_stahtd_events =() {\nEventData\n| where Message contains 'stahtd'\n| extend EventCategory = extract(@'\\\"message_type\\\":\\\"(.*?)\\\"', 1, Message)\n| extend SrcDvcMacAddr = extract(@'\\\"mac\\\":\\\"(.*?)\\\"', 1, Message)\n| extend WlanId = extract(@'\\\"vap\\\":\\\"(.*?)\\\"', 1, Message)\n| extend AssocStatus = extract(@'\\\"assoc_status\\\":\\\"(.*?)\\\"', 1, Message)\n| extend EventResult = extract(@'\\\"event_type\\\":\\\"(.*?)\\\"', 1, Message)\n| extend EventMessage = extract(@'\\}\\s-\\s(.*)', 1, Message)\n};\nlet ubiquiti_EVT_AP_STA_ASSOC_TRACKER_DBG =() {\nEventData\n| where Message contains 'libubnt'\n| where Message contains 'EVT_AP_STA_ASSOC_TRACKER_DBG'\n| extend EventCategory = 'libubnt'\n| extend WlanId = extract(@'vap:\\s(.*?)', 1, Message)\n| extend SrcMacAddr = extract(@'sta_mac:\\s(.*?)', 1, Message)\n| extend EventResult = extract(@'event_type:\\s(.*)', 1, Message)\n| extend EventMessage = 'Client failed to associate with an AP'\n};\nlet ubiquiti_EVENT_STA_ =() {\nEventData\n| where Message contains 'libubnt'\n| where Message contains 'EVENT_STA_'\n| extend EventCategory = 'libubnt'\n| extend WlanId = extract(@'EVENT_STA_(JOIN|LEAVE|IP)\\s(\\w+):', 2, Message)\n| extend DvcAction = extract(@'EVENT_STA_(JOIN|LEAVE|IP)', 1, Message)\n| extend EventMessage = case(DvcAction == 'JOIN', 'Client joined AP',\n                             DvcAction == 'LEAVE', 'Client disconnected from AP',\n                             'Client IP info')\n| extend SrcMacAddr = extract(@':\\s([A-Fa-f0-9:]{17})', 1, Message)\n| extend SrcIpAddr = extract(@'\\/\\s(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', 1, Message)\n};\nlet ubiquiti_syswrapper_events =() {\nEventData\n| where Message contains 'syswrapper'\n| extend EventCategory = 'syswrapper'\n| extend EventMessage = extract(@'syswrapper:\\s(.*)', 1, Message)\n};\nlet ubiquiti_logread_events =() {\nEventData\n| where Message contains 'logread'\n| extend EventCategory = 'logread'\n| extend DstIpAddr = extract(@'to\\s(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', 1, Message)\n| extend DstPortNumber = extract(@'\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}:(\\d{1,5})', 1, Message)\n| extend EventMessage = extract(@'logread\\[\\d+\\]:\\s(.*)', 1, Message)\n};\nlet ubiquiti_stamgr_events =() {\nEventData\n| where Message contains'stamgr'\n| extend EventCategory = 'stamgr'\n| extend DstMacAddr = extract(@'\\s([A-Fa-f0-9:]{17})', 1, Message)\n| extend WlanId = extract(@'\\s[A-Fa-f0-9:]{17}\\s(\\S+)', 1, Message)\n| extend EventMessage = extract(@'stamgr:(.*?)\\(', 1, Message)\n| extend EventResultDetails = extract(@'reason:(.*?)\\)', 1, Message)\n};\nlet ubiquiti_kernel_events =() {\nEventData\n| where Message contains 'kernel'\n| where Message contains 'FWLOG' or Message contains 'set_ratelimit'\n| extend EventCategory = 'kernel'\n| extend EventMessage = case(Message matches regex \"kernel.*FWLOG\", extract(@'FWLOG:\\s\\[\\d+\\]\\s(.*)', 1, Message),\n                             Message matches regex \"kernel.*_set_ratelimit\", extract(@'_set_ratelimit:\\s(.*)', 1, Message),\n                             \"Check raw_message for details\")\n};\nlet ubiquiti_dns_events =() {\nEventData\n| where Message matches regex @'dnsmasq\\[\\d+\\]:'\n| extend DstMacAddr = extract(@'MAC=([a-fA-F0-9:]{17}):', 1, Message)\n| extend SrcMacAddr = extract(@'MAC=[a-fA-F0-9:]{17}:([a-fA-F0-9:]{17})\\s', 1, Message) \n| extend DnsQuery = extract(@'dnsmasq\\[\\d+\\]:\\s(.*?)\\[\\w+\\]|\\s(\\S+)\\sfrom\\s\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', 2, Message)\n| extend SrcIpAddr = extract(@'dnsmasq\\[\\d+\\]:\\s(.*?)\\[\\w+\\]|\\s(.*?)from\\s(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})', 3, Message)\n};\nunion isfuzzy=true ubiquiti_dropbear_events, ubiquiti_hostapd_events, ubiquiti_firewall_events, ubiquiti_dns_timeout_events, ubiquiti_stahtd_events, ubiquiti_EVT_AP_STA_ASSOC_TRACKER_DBG, ubiquiti_EVENT_STA_, ubiquiti_syswrapper_events, ubiquiti_logread_events, ubiquiti_stamgr_events, ubiquiti_kernel_events, ubiquiti_dns_events\n| project TimeGenerated\n        , EventVendor\n        , EventTime\n        , EventCategory\n        , DvcType\n        , DvcMacAddr\n        , FirmwareVersion\n        , EventMessage\n        , WlanId\n        , SrcType\n        , Service\n        , FlowId\n        , DvcInboundInterface\n        , DvcOutboundInterface\n        , DvcAction\n        , NetworkRuleName\n        , SrcMacAddr\n        , SrcIpAddr\n        , SrcPortNumber\n        , DstMacAddr\n        , DstIpAddr\n        , DstPortNumber\n        , NetworkBytes\n        , Tos\n        , Prec\n        , Ttl\n        , NetworkProtocol\n        , Window\n        , Res\n        , Mark\n        , DnsQuery\n        , DnsServer\n        , SrcDvcMacAddr\n        , AssocStatus\n        , EventResult\n        , EventResultDetails\n        , Message\n",
-            "version": 1
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 1",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - DNS requests timed out",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where isnotempty(DnsQuery)\n| where EventMessage =~ 'DNS request timed out'\n| extend Name = DnsQuery\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows failed DNS requests due to timeout."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl,Exfiltration"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 2",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Hidden internal DNS server",
-            "category": "Hunting Queries",
-            "query": "let threshold = 100;\nUbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where ipv4_is_private(DstIpAddr)\n| where DvcAction =~ 'Accepted'\n| where DstPortNumber == '53'\n| summarize count() by DstIpAddr\n| where count_ > threshold\n| extend IPCustomEntity = DstIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of unaccounted internal DNS servers."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 3",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Rare internal ports",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where ipv4_is_private(DstIpAddr)\n| where DvcAction =~ 'Accepted'\n| where isnotempty(DstPortNumber)\n| summarize count() by DstPortNumber, DstIpAddr\n| top 10 by count_ asc\n  | extend IPCustomEntity = DstIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of least used internal destination ports."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 4",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Top blocked destinations",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| summarize count() by DstIpAddr\n| top 10 by count_\n| extend IPCustomEntity = DstIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of top destinations connections to which were blocked by firewall."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl,Exfiltration"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 5",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Top blocked external services",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| where isnotempty(DstPortNumber)\n| where ipv4_is_private(DstIpAddr) == 'False'\n| extend svc_name = case(DstPortNumber in ('20', '21'), 'FTP',\n                        DstPortNumber == '22', 'SSH',\n                        DstPortNumber == '23', 'Telnet',\n                        DstPortNumber == '25', 'SMTP',\n                        DstPortNumber == '53', 'DNS',\n                        DstPortNumber in ('67', '68'), 'DHCP',\n                        DstPortNumber == '110', 'POP3',\n                        DstPortNumber == '123', 'NTP',\n                        DstPortNumber in ('137', '138', '139'), 'NeTBIOS',\n                        DstPortNumber == '143', 'IMAP',\n                        DstPortNumber == '220', 'IMAPv3',\n                        DstPortNumber == '389', 'LDAP',\n                        DstPortNumber == '3389', 'RDP',\n                        DstPortNumber == '514', 'Syslog',\n                        DstPortNumber == '80', 'HTTP',\n                        DstPortNumber == '443', 'HTTPS',\n                        DstPortNumber )\n| summarize count() by svc_name, SrcIpAddr\n| top 10 by count_\n| extend IPCustomEntity = SrcIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of top blocked connections to external services."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl,Exfiltration"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 6",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Top blocked internal services",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| where isnotempty(DstPortNumber)\n| where ipv4_is_private(DstIpAddr)\n| extend svc_name = case(DstPortNumber in ('20', '21'), 'FTP',\n                        DstPortNumber == '22', 'SSH',\n                        DstPortNumber == '23', 'Telnet',\n                        DstPortNumber == '25', 'SMTP',\n                        DstPortNumber == '53', 'DNS',\n                        DstPortNumber in ('67', '68'), 'DHCP',\n                        DstPortNumber == '110', 'POP3',\n                        DstPortNumber == '123', 'NTP',\n                        DstPortNumber in ('137', '138', '139'), 'NeTBIOS',\n                        DstPortNumber == '143', 'IMAP',\n                        DstPortNumber == '220', 'IMAPv3',\n                        DstPortNumber == '389', 'LDAP',\n                        DstPortNumber == '3389', 'RDP',\n                        DstPortNumber == '514', 'Syslog',\n                        DstPortNumber == '80', 'HTTP',\n                        DstPortNumber == '443', 'HTTPS',\n                        DstPortNumber )\n| summarize count() by svc_name, SrcIpAddr\n| top 10 by count_\n| extend IPCustomEntity = SrcIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of top blocked connections to internal services."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess,CommandAndControl"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 7",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Top blocked sources",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| where DvcAction =~ 'Blocked'\n| summarize count() by SrcIpAddr\n| top 10 by count_\n| extend IPCustomEntity = SrcIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of top sources with blocked connections."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl,Exfiltration"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 8",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Top firewall rules",
-            "category": "Hunting Queries",
-            "query": "UbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where EventCategory =~ 'firewall'\n| summarize count() by NetworkRuleName\n| top 10 by count_\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of top triggered firewall rules."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl,Exfiltration"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 9",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Unusual number of subdomains for top level domain (TLD)",
-            "category": "Hunting Queries",
-            "query": "let threshold = 100;\nUbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where isnotempty(DnsQuery)\n| extend replaced = replace(@'\\.$', @'', DnsQueryName)\n| extend Domain = extract(@'.*\\.(.*\\.[a-z]+)', 1, replaced)\n| extend fqdn = extract(@'(.*)\\..*\\.[a-z]+', 1, replaced)\n| summarize FQDNs = dcount(fqdn) by Domain\n| where FQDNs > threshold\n| extend HostCustomEntity = Domain\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query counts the number of unique subdomains for each TLD."
-              },
-              {
-                "name": "tactics",
-                "value": "CommandAndControl"
-              }
-            ]
-          }
-        },
-        {
-          "type": "savedSearches",
-          "apiVersion": "2020-08-01",
-          "name": "Ubiquiti Hunting Query 10",
-          "dependsOn": [
-            "[variables('workspace-dependency')]"
-          ],
-          "properties": {
-            "eTag": "*",
-            "displayName": "Ubiquiti - Vulnerable devices",
-            "category": "Hunting Queries",
-            "query": "let latest_firmware = '4.0.80.10875';\nUbiquitiAuditEvent\n| where TimeGenerated > ago(24h)\n| where FirmwareVersion != latest_firmware\n| extend IPCustomEntity = SrcIpAddr\n",
-            "version": 1,
-            "tags": [
-              {
-                "name": "description",
-                "value": "Query shows list of devices (APs) which do not have the latest version of firmware installed."
-              },
-              {
-                "name": "tactics",
-                "value": "InitialAccess"
-              }
-            ]
-          }
-        }
-      ]
     }
   ],
   "outputs": {}
