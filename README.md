@@ -51,3 +51,7 @@ This repository has undergone modernization efforts (as of August 2024) to updat
 - **Solution Content Verification:** Verify that workbooks, analytics rules, and other content deployed by the linked templates function correctly with the updated APIs and data structures.
 - **Deployment Script Logic:** Review the logic within `Add-AzureMonitorData.ps1` and `Update-DetectionRules.ps1` for potential improvements or adjustments needed after API changes.
 - **README Updates:** Further refine this README with more detailed usage instructions and notes on the updated architecture.
+
+**Verification Approach Note (YYYY-MM-DD):**
+*   Due to the nature of the playground (intended for user-driven Portal deployment), the initial deployment step for verification was simulated based on code analysis of `azuredeploy.json` and `UiDefinition.json`, rather than executing `az deployment group create` directly.
+*   Phase 2 verification (Core Infrastructure, Standard Connectors, Sample Data Ingestion) was completed via code analysis, confirming the template uses modern resources (DCE/DCR, MI) and targets `SecureHats_CL` correctly. Proceeding to Phase 3 (Parsers, Rules, Workbooks).

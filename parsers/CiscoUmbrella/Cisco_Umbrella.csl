@@ -3,150 +3,104 @@
 // Function usually takes 10-15 minutes to activate. You can then use function alias from any other queries (e.g. Cisco_Umbrella | take 10).
 // Reference : Using functions in Azure monitor log queries : https://docs.microsoft.com/azure/azure-monitor/log-query/functions
 
-let Cisco_Umbrella_dns_view = view () { 
-    Cisco_Umbrella_dns_CL
-    | extend 
-        EventEndTime=column_ifexists('Timestamp_t', ''),
-        SrcIpAddr=column_ifexists('InternalIp_s', ''),
-        SrcNatIpAddr=column_ifexists('ExternalIp_s', ''),
-        DvcAction=column_ifexists('Action_s', ''),
-        DnsQueryName=column_ifexists('Domain_s', ''),
-        UrlCategory=column_ifexists('Categories_s', ''),
-        ThreatCategory=column_ifexists('Blocked_Categories_s', ''),
-        Identities=column_ifexists('Identities_s', ''),
-        DnsQueryTypeName=column_ifexists('QueryType_s', ''),
-        DnsResponseCodeName=column_ifexists('ResponseCode_s', ''),
-        IdentityTypes=column_ifexists('Identity_Types_s', ''),
-        EventType=column_ifexists('EventType_s', ''),
-        PolicyIdentity=column_ifexists('Policy_Identity_s', ''),
-        PolicyIdentityType=column_ifexists('Policy_Identity_Type_s', '')
-    | project 
-        TimeGenerated,
-        EventEndTime,
-        SrcIpAddr,
-        SrcNatIpAddr,
-        DvcAction,
-        DnsQueryName,
-        UrlCategory,
-        ThreatCategory,
-        Identities,
-        DnsQueryTypeName,
-        DnsResponseCodeName,
-        IdentityTypes,
-        EventType,
-        PolicyIdentity,
-        PolicyIdentityType
-};
-let Cisco_Umbrella_proxy_view = view () { 
-    Cisco_Umbrella_proxy_CL
-    | extend 
-        EventType=column_ifexists('EventType_s', ''),
-        EventEndTime=column_ifexists('Timestamp_t', ''),
-        Identities=column_ifexists('Identities_s', ''),
-        SrcIpAddr=column_ifexists('Internal_IP_s', ''),
-        SrcNatIpAddr=column_ifexists('External_IP_s', ''),
-        DstIpAddr=column_ifexists('Destination_IP_s', ''),
-        HttpContentType=column_ifexists('Content_Type_s', ''),
-        DvcAction=column_ifexists('Verdict_s', ''),
-        UrlOriginal=column_ifexists('URL_s', ''),
-        HttpReferrerOriginal=column_ifexists('Referer_s', ''),
-        HttpUserAgentOriginal=column_ifexists('userAgent_s', ''),
-        HttpStatusCode=column_ifexists('statusCode_s', ''),
-        SrcBytes=column_ifexists('requestSize_d', ''),
-        DstBytes=column_ifexists('responseSize_d', ''),
-        HttpResponseBodyBytes=column_ifexists('responseBodySize_d', ''),
-        HashSha256=column_ifexists('SHA-SHA256_s', ''),
-        UrlCategory=column_ifexists('Categories_s', ''),
-        AvDetections=column_ifexists('AVDetections_s', ''),
-        Puas=column_ifexists('PUAs_s', ''),
-        AmpDisposition=column_ifexists('AMP_Disposition_s', ''), 
-        ThreatName=column_ifexists('AMP_Malware_Name_s', ''),
-        AmpScore=column_ifexists('AMP_Score_s', ''),
-        IdentityType=column_ifexists('Identity_Type_s', ''),
-        ThreatCategory=column_ifexists('Blocked_Categories_s', '')
-    | project
-        TimeGenerated,
-        EventType,
-        EventEndTime,
-        Identities,
-        SrcIpAddr,
-        SrcNatIpAddr,
-        DstIpAddr,
-        HttpContentType,
-        DvcAction,
-        UrlOriginal,
-        HttpReferrerOriginal,
-        HttpUserAgentOriginal,
-        HttpStatusCode,
-        SrcBytes,
-        DstBytes,
-        HttpResponseBodyBytes,
-        HashSha256,
-        UrlCategory,
-        AvDetections,
-        Puas,
-        AmpDisposition,
-        ThreatName,
-        AmpScore,
-        IdentityType,
-        ThreatCategory
-};
-let Cisco_Umbrella_ip_view = view () { 
-    Cisco_Umbrella_ip_CL
-    | extend 
-        EventType=column_ifexists('EventType_s', ''),
-        EventEndTime=column_ifexists('Timestamp_t', ''),
-        Identities=column_ifexists('Identity_s', ''),
-        SrcIpAddr=column_ifexists('Source_IP_s', ''),
-        SrcPortNumber=column_ifexists('Source_Port_s', ''),
-        DstIpAddr=column_ifexists('Destination_IP_s', ''),
-        DstPortNumber=column_ifexists('Destination_Port_s', ''),
-        UrlCategory=column_ifexists('Categories_s', '')
-    | project
-        TimeGenerated,
-        EventType,
-        EventEndTime,
-        Identities,
-        SrcIpAddr,
-        SrcPortNumber,
-        DstIpAddr,
-        DstPortNumber,
-        UrlCategory
-};
-let Cisco_Umbrella_cloudfirewall_view = view () { 
-    Cisco_Umbrella_cloudfirewall_CL
-    | extend 
-        EventType=column_ifexists('EventType_s', ''),
-        EventEndTime=column_ifexists('Timestamp_t', ''),
-        NetworkSessionId=column_ifexists('originId_s', ''),
-        NetworkRuleName=column_ifexists('Identity_s', ''),
-        IdentityType=column_ifexists('Identity_Type_s', ''),
-        NetworkDirection=column_ifexists('Direction_s', ''),
-        NetworkProtocol=column_ifexists('ipProtocol_s', ''),
-        NetworkPackets=column_ifexists('packetSize_s', ''),
-        SrcIpAddr=column_ifexists('SourceIP', ''),
-        SrcPortNumber=column_ifexists('sourcePort_s', ''),
-        DstIpAddr=column_ifexists('destinationIp_s', ''),
-        DstPortNumber=column_ifexists('destinationPort_s', ''),
-        DvcHostname=column_ifexists('dataCenter_s', ''),
-        NetworkRuleNumber=column_ifexists('ruleId_s', ''),
-        DvcAction=column_ifexists('verdict_s', '')
-    | project
-        TimeGenerated,
-        EventType,
-        EventEndTime,
-        NetworkSessionId,
-        NetworkRuleName,
-        IdentityType,
-        NetworkDirection,
-        NetworkProtocol,
-        NetworkPackets,
-        SrcIpAddr,
-        SrcPortNumber,
-        DstIpAddr,
-        DstPortNumber,
-        DvcHostname,
-        NetworkRuleNumber,
-        DvcAction
-};
-union isfuzzy=true Cisco_Umbrella_dns_view, Cisco_Umbrella_proxy_view, Cisco_Umbrella_ip_view, Cisco_Umbrella_cloudfirewall_view
+SecureHats_CL
+| where LogSourceType startswith "Cisco_Umbrella_" // Filter for Umbrella logs ingested by the updated script
+| extend RawDataObject = todynamic(RawData) // Parse the JSON string in RawData
+| extend
+    // Common fields (attempt to extract, might be null depending on type)
+    EventEndTime = unixtime_milliseconds_todatetime(tolong(RawDataObject.Timestamp_t)), // Assuming Timestamp_t is epoch milliseconds
+    EventType = tostring(RawDataObject.EventType_s),
+    Identities = tostring(RawDataObject.Identities_s),
+    IdentityType = tostring(RawDataObject.Identity_Type_s),
+    SrcIpAddr = coalesce(tostring(RawDataObject.InternalIp_s), tostring(RawDataObject.Internal_IP_s), tostring(RawDataObject.Source_IP_s), tostring(RawDataObject.SourceIP)),
+    SrcNatIpAddr = coalesce(tostring(RawDataObject.ExternalIp_s), tostring(RawDataObject.External_IP_s)),
+    DstIpAddr = coalesce(tostring(RawDataObject.Destination_IP_s), tostring(RawDataObject.destinationIp_s)),
+    DstPortNumber = coalesce(tostring(RawDataObject.Destination_Port_s), tostring(RawDataObject.destinationPort_s)),
+    SrcPortNumber = tostring(RawDataObject.Source_Port_s), // Only in IP logs?
+    UrlCategory = tostring(RawDataObject.Categories_s),
+    ThreatCategory = tostring(RawDataObject.Blocked_Categories_s),
+    DvcAction = coalesce(tostring(RawDataObject.Action_s), tostring(RawDataObject.Verdict_s), tostring(RawDataObject.verdict_s)),
+
+    // DNS specific
+    DnsQueryName = tostring(RawDataObject.Domain_s),
+    DnsQueryTypeName = tostring(RawDataObject.QueryType_s),
+    DnsResponseCodeName = tostring(RawDataObject.ResponseCode_s),
+    PolicyIdentity = tostring(RawDataObject.Policy_Identity_s),
+    PolicyIdentityType = tostring(RawDataObject.Policy_Identity_Type_s),
+
+    // Proxy specific
+    HttpContentType = tostring(RawDataObject.Content_Type_s),
+    UrlOriginal = tostring(RawDataObject.URL_s),
+    HttpReferrerOriginal = tostring(RawDataObject.Referer_s),
+    HttpUserAgentOriginal = tostring(RawDataObject.userAgent_s),
+    HttpStatusCode = tostring(RawDataObject.statusCode_s),
+    SrcBytes = RawDataObject.requestSize_d,
+    DstBytes = RawDataObject.responseSize_d,
+    HttpResponseBodyBytes = RawDataObject.responseBodySize_d,
+    HashSha256 = tostring(RawDataObject.['SHA-SHA256_s']),
+    AvDetections = tostring(RawDataObject.AVDetections_s),
+    Puas = tostring(RawDataObject.PUAs_s),
+    AmpDisposition = tostring(RawDataObject.AMP_Disposition_s),
+    ThreatName = tostring(RawDataObject.AMP_Malware_Name_s),
+    AmpScore = RawDataObject.AMP_Score_s,
+
+    // Cloud Firewall specific
+    NetworkSessionId = tostring(RawDataObject.originId_s),
+    NetworkRuleName = tostring(RawDataObject.Identity_s), // Re-using Identity_s based on old parser
+    NetworkDirection = tostring(RawDataObject.Direction_s),
+    NetworkProtocol = tostring(RawDataObject.ipProtocol_s),
+    NetworkPackets = tostring(RawDataObject.packetSize_s),
+    DvcHostname = tostring(RawDataObject.dataCenter_s),
+    NetworkRuleNumber = tostring(RawDataObject.ruleId_s)
+
+| project
+    // Base fields
+    TimeGenerated, // Original ingestion time
+    LogSourceType, // Added by ingestion script
+    EventEndTime, // Parsed timestamp from log
+    EventType,
+    Identities,
+    IdentityType,
+    SrcIpAddr,
+    SrcNatIpAddr,
+    DstIpAddr,
+    DstPortNumber,
+    SrcPortNumber, 
+    UrlCategory,
+    ThreatCategory,
+    DvcAction,
+
+    // DNS
+    DnsQueryName,
+    DnsQueryTypeName,
+    DnsResponseCodeName,
+    PolicyIdentity,
+    PolicyIdentityType,
+
+    // Proxy
+    HttpContentType,
+    UrlOriginal,
+    HttpReferrerOriginal,
+    HttpUserAgentOriginal,
+    HttpStatusCode,
+    SrcBytes,
+    DstBytes,
+    HttpResponseBodyBytes,
+    HashSha256,
+    AvDetections,
+    Puas,
+    AmpDisposition,
+    ThreatName,
+    AmpScore,
+
+    // Firewall
+    NetworkSessionId,
+    NetworkRuleName,
+    NetworkDirection,
+    NetworkProtocol,
+    NetworkPackets,
+    DvcHostname,
+    NetworkRuleNumber,
+    
+    // Keep RawData for debugging if needed
+    RawData

@@ -184,13 +184,39 @@ function processResponse {
             Write-Output "Processing JSON data file: $($fileObject.name)"
             try {
                 # Get the raw JSON content
-                $jsonContent = Invoke-RestMethod -Method Get -Uri $fileObject.download_url
+                $jsonContentString = Invoke-RestMethod -Method Get -Uri $fileObject.download_url -UseBasicParsing # UseBasicParsing might help with large files/complex JSON
 
-                # Ensure it's valid JSON array string for the API
-                # The API expects an array of objects. If the downloaded content is a single object, wrap it in an array.
-                $jsonPayloadString = $jsonContent | ConvertTo-Json -Depth 10 -Compress
-                if ($jsonPayloadString -notlike '[*]') {
-                    $jsonPayloadString = "[$jsonPayloadString]"
+                # Convert to PowerShell object(s)
+                $psObject = $jsonContentString | ConvertFrom-Json
+
+                # Determine the source type from the filename (e.g., QualysKB_CL from QualysKB_CL.json)
+                $sourceType = (($fileObject.name) -split "\\.")[0]
+                Write-Verbose "Assigning LogSourceType '$sourceType' to records from $($fileObject.name)"
+
+                # Add the LogSourceType field to each record
+                $modifiedObjects = if ($psObject -is [array]) {
+                    # Process array of objects
+                    foreach ($item in $psObject) {
+                        $item | Add-Member -MemberType NoteProperty -Name "LogSourceType" -Value $sourceType -Force
+                        $item # Output the modified item to the pipeline for collection
+                    }
+                } else {
+                    # Process single object
+                    $psObject | Add-Member -MemberType NoteProperty -Name "LogSourceType" -Value $sourceType -Force
+                    $psObject # Output the modified item
+                }
+                
+                # Convert the modified object(s) back to a JSON string payload for the API
+                # Ensure it's an array if multiple objects, handle depth and compression
+                $jsonPayloadString = $modifiedObjects | ConvertTo-Json -Depth 10 -Compress
+
+                # Ensure the final payload is a JSON array string if it was originally an array or became one
+                # ConvertTo-Json handles this correctly for arrays, but check just in case of single object edge cases.
+                # If $modifiedObjects was a single item, ConvertTo-Json outputs a single JSON object string.
+                # The DCE API expects a JSON array. So, wrap single objects.
+                if ($jsonPayloadString -notlike '[*]' -and $jsonPayloadString -like '{*}') {
+                     Write-Verbose "Wrapping single JSON object in an array for DCE API."
+                     $jsonPayloadString = "[$jsonPayloadString]"
                 }
 
                 # Call the new function to send data to DCE
@@ -202,6 +228,11 @@ function processResponse {
 
             } catch {
                 Write-Error "Error processing JSON file $($fileObject.name): $($_.Exception.Message)"
+                 # Log more details about the error if possible
+                if ($_.Exception.Response) {
+                    $errorResponse = $_.Exception.Response.GetResponseStream() | New-Object System.IO.StreamReader | %{$_.ReadToEnd()}
+                    Write-Error "API Error Response: $errorResponse"
+                }
             }
         }
         else {
