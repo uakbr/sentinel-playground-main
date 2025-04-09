@@ -1,21 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100" viewBox="0 0 320 80">
-  <style>
-    .text { font-family: Arial, sans-serif; font-weight: 900; text-anchor: middle; }
-    .main-text { font-size: 32px; fill: #2c3e50; }
-    .tagline { font-size: 16px; fill: #7f8c8d; }
-    .accent { fill: #3498db; }
-  </style>
-  <text x="160" y="40" class="text main-text">Risk<tspan class="accent">Logic</tspan>Group</text>
-  <text x="160" y="65" class="text tagline">Security Intelligence Solutions</text>
-</svg>
+&nbsp;
 
-# Microsoft Sentinel Playground
+&nbsp;
+
+<div align="center">
+<h1>Risk<span style="color:#0078d4">Logic</span>Group</h1>
+<h2>Microsoft Sentinel Playground</h2>
+
+&nbsp;
 
 [![GitHub release](https://img.shields.io/github/release/RiskLogicGroup/Sentinel-playground.svg?style=flat-square)](https://github.com/RiskLogicGroup/Sentinel-playground/releases)
 [![Maintenance](https://img.shields.io/maintenance/yes/2024.svg?style=flat-square)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FRiskLogicGroup%2FSentinel-playground%2Fmain%2FARM-Templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FRiskLogicGroup%2FSentinel-playground%2Fmain%2FARM-Templates%2FUiDefinition.json)
+</div>
 
 ## Overview
 
