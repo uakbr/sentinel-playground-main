@@ -730,40 +730,40 @@
             {
               "metricName": "Prisma Cloud alerts",
               "legend": "PaloAltoPrismaCloudAlert_CL",
-              "baseQuery": "PaloAltoPrismaCloudAlert_CL"
+              "baseQuery": "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAlert'"
             },
             {
               "metricName": "Prisma Cloud audit logs",
               "legend": "PaloAltoPrismaCloudAudit_CL",
-              "baseQuery": "PaloAltoPrismaCloudAudit_CL"
+              "baseQuery": "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAudit'"
             }
           ],
           "sampleQueries": [
             {
               "description": "All Prisma Cloud alerts",
-              "query": "PaloAltoPrismaCloudAlert_CL\n| sort by TimeGenerated desc"
+              "query": "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAlert'\n| sort by TimeGenerated desc"
             },
             {
               "description": "All Prisma Cloud audit logs",
-              "query": "PaloAltoPrismaCloudAudit_CL\n| sort by TimeGenerated desc"
+              "query": "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAudit'\n| sort by TimeGenerated desc"
             }
           ],
           "dataTypes": [
             {
               "name": "Palo Alto Prisma Cloud Alerts",
-              "lastDataReceivedQuery": "PaloAltoPrismaCloudAlert\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+              "lastDataReceivedQuery": "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAlert'\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
             },
             {
               "name": "Palo Alto Prisma Cloud Audit Events",
-              "lastDataReceivedQuery": "PaloAltoPrismaCloudAudit\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+              "lastDataReceivedQuery": "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAudit'\n| summarize Time = max(TimeGenerated)\n| where isnotempty(Time)"
             }
           ],
           "connectivityCriterias": [
             {
               "type": "IsConnectedQuery",
               "value": [
-                "PaloAltoPrismaCloudAlert_CL\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(3d)",
-                "PaloAltoPrismaCloudAudit_CL\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(3d)"
+                "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAlert'\n| summarize LastLogReceived = max(TimeGenerated)\n| project IsConnected = LastLogReceived > ago(3d)",
+                "PaloAltoPrismaCloud\n| where EventType == 'PaloAltoPrismaCloudAudit'\n| summarize LastLogReceived = max(TimeGenerated)\n| project IsConnected = LastLogReceived > ago(3d)"
               ]
             }
           ],

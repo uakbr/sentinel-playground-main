@@ -567,7 +567,7 @@
           "graphQueries": [
             {
               "metricName": "Total data received",
-              "legend": "Ubiquiti_CL",
+              "legend": "Ubiquiti Network Events",
               "baseQuery": "UbiquitiAuditEvent"
             }
           ],

@@ -1,11 +1,21 @@
-![logo](./media/sh-banners.png)
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100" viewBox="0 0 320 80">
+  <style>
+    .text { font-family: Arial, sans-serif; font-weight: 900; text-anchor: middle; }
+    .main-text { font-size: 32px; fill: #2c3e50; }
+    .tagline { font-size: 16px; fill: #7f8c8d; }
+    .accent { fill: #3498db; }
+  </style>
+  <text x="160" y="40" class="text main-text">Risk<tspan class="accent">Logic</tspan>Group</text>
+  <text x="160" y="65" class="text tagline">Security Intelligence Solutions</text>
+</svg>
+
 # Microsoft Sentinel Playground
 
-[![GitHub release](https://img.shields.io/github/release/SecureHats/Sentinel-playground.svg?style=flat-square)](https://github.com/SecureHats/Sentinel-playground/releases)
+[![GitHub release](https://img.shields.io/github/release/RiskLogicGroup/Sentinel-playground.svg?style=flat-square)](https://github.com/RiskLogicGroup/Sentinel-playground/releases)
 [![Maintenance](https://img.shields.io/maintenance/yes/2024.svg?style=flat-square)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FSecureHats%2FSentinel-playground%2Fmain%2FARM-Templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FSecureHats%2FSentinel-playground%2Fmain%2FARM-Templates%2FUiDefinition.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FRiskLogicGroup%2FSentinel-playground%2Fmain%2FARM-Templates%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FRiskLogicGroup%2FSentinel-playground%2Fmain%2FARM-Templates%2FUiDefinition.json)
 
 ## Overview
 
@@ -39,12 +49,12 @@ The Sentinel Playground implements a modern cloud-native architecture leveraging
 1. **Sample Data Ingestion**:
    - Sample JSON logs from the `/samples/` directory
    - Data enriched with `LogSourceType` field for source tracking
-   - Ingested via Azure Monitor Logs Ingestion API to the `SecureHats_CL` custom table
+   - Ingested via Azure Monitor Logs Ingestion API to the `RiskLogicGroup_CL` custom table
    - Managed using PowerShell deployment scripts in containers
 
 2. **KQL Parsers**:
    - Deployed as saved searches/functions in the workspace
-   - Transform raw `SecureHats_CL` data into structured, normalized tables
+   - Transform raw `RiskLogicGroup_CL` data into structured, normalized tables
    - Support various data source formats (CrowdStrike, Box, Cisco ISE, etc.)
 
 3. **Analytics Rules**:
@@ -145,7 +155,7 @@ azuredeploy.json (main template)
 
 ```bash
 # Clone the repository
-git clone https://github.com/SecureHats/Sentinel-playground.git
+git clone https://github.com/RiskLogicGroup/Sentinel-playground.git
 cd Sentinel-playground
 
 # Login to Azure
@@ -170,7 +180,7 @@ az deployment group create \
 
 ```powershell
 # Clone the repository
-git clone https://github.com/SecureHats/Sentinel-playground.git
+git clone https://github.com/RiskLogicGroup/Sentinel-playground.git
 cd Sentinel-playground
 
 # Login to Azure
@@ -211,7 +221,7 @@ Parsers are implemented as KQL functions:
 1. **File Format**: `.csl` files in the `/parsers/` directory
 2. **Deployment Method**:
    - Added as saved searches with function aliases
-   - Automatically updated to reference the `SecureHats_CL` table
+   - Automatically updated to reference the `RiskLogicGroup_CL` table
    - Accessible through their aliases in KQL queries
 
 ### Analytics Rules
@@ -277,7 +287,7 @@ Common issues and their solutions:
 
 2. **Missing Data**:
    - Verify DCE/DCR configuration
-   - Check the `SecureHats_CL` table for ingested data
+   - Check the `RiskLogicGroup_CL` table for ingested data
    - Review parser functions for errors
 
 3. **Analytics Rule Issues**:
@@ -301,4 +311,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Microsoft Sentinel team for their ongoing development of Sentinel capabilities
-- SecureHats community for their contributions and feedback
+- RiskLogicGroup team for their development and maintenance of this solution
+- Visit [RiskLogicGroup.com](https://www.risklogicgroup.com) for more security solutions and expertise

@@ -134,7 +134,7 @@
 ### 2.1. CrowdStrike Parser Updates
 * [C-AI 2023-08-12] **Create New Parser Function**
   * Develop CrowdStrikeFalconEventStream parser:
-    * Use SecureHats_CL table as the data source
+    * Use RiskLogicGroup_CL table as the data source
     * Filter with LogSourceType == "CrowdStrike_CL"
     * Maintain field naming conventions from original parser
 
@@ -193,13 +193,13 @@
 ### 3.1. CrowdStrike Connector
 * [C-AI 2023-08-14] **Update Base Queries**
   * Modify graph query references:
-    * Replace CommonSecurityLog_CL with SecureHats_CL
+    * Replace CommonSecurityLog_CL with RiskLogicGroup_CL
     * Update LogSourceType filter condition
     * Test updated queries for correct results
 
 * [C-AI 2023-08-14] **Fix Last Data Received Query**
   * Update lastDataReceivedQuery property:
-    * Use SecureHats_CL with appropriate LogSourceType
+    * Use RiskLogicGroup_CL with appropriate LogSourceType
     * Maintain backward compatibility for existing deployments
     * Test time range functionality
 
@@ -222,26 +222,26 @@
     * Use vendor/product naming instead of technical details
     * Update translation resources if multilingual
 
-* [ ] **Update UI Components**
+* [C-AI 2023-08-14] **Update UI Components**
   * Fix all display name references:
     * Update connector cards
     * Fix status display text
     * Update connector documentation
 
 ### 3.3. Base Query Updates
-* [ ] **Inventory All Queries**
+* [C-AI 2023-08-14] **Inventory All Queries**
   * Document all connector queries:
     * List queries by connector type
     * Note table dependencies
     * Categorize by function (status, data retrieval, etc.)
 
-* [ ] **Standardize Query Structure**
+* [C-AI 2023-08-14] **Standardize Query Structure**
   * Apply consistent patterns:
     * Use parser functions instead of direct table references
     * Optimize for performance with appropriate filters
     * Ensure consistent time range handling
 
-* [ ] **Validate Updated Queries**
+* [C-AI 2023-08-14] **Validate Updated Queries**
   * Test each query:
     * Verify data retrieval accuracy
     * Check performance impact
@@ -249,7 +249,7 @@
 
 ## 4. Workbook Fixes
 ### 4.1. Box Workbook
-* [ ] **Identify Direct References**
+* [C-AI 2023-08-14] **Identify Direct References**
   * Scan all queries in the workbook JSON:
     * Find instances of BoxEvents_CL references
     * Document query location and purpose
