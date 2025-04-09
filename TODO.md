@@ -24,59 +24,59 @@
 
 ## 1. Entity Mapping Issues
 ### 1.1. Cisco ISE Analytics Rules
-* [ ] **Rule 4: Certificate Expiration**
+* [C-AI 2023-08-12] **Rule 4: Certificate Expiration**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `HostCustomEntity` → `Host.HostName`
     * Map `IPCustomEntity` → `IP.Address`
 
-* [ ] **Rule 5: Command with Highest Privileges from New IP**
+* [C-AI 2023-08-12] **Rule 5: Command with Highest Privileges from New IP**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Update KQL query to extract relevant entity fields
 
-* [ ] **Rule 6: Command with Highest Privileges by New User**
+* [C-AI 2023-08-12] **Rule 6: Command with Highest Privileges by New User**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Ensure entities are populated from correct fields in the KQL
 
-* [ ] **Rule 7: Device Changed IP**
+* [C-AI 2023-08-12] **Rule 7: Device Changed IP**
   * Add the following entity mappings:
     * Map `HostCustomEntity` → `Host.HostName`
     * Map `IPCustomEntity` → `IP.Address` (both old and new)
     * Add dynamics extraction for both old/new IP addresses
 
-* [ ] **Rule 8: Device PostureStatus Changed**
+* [C-AI 2023-08-12] **Rule 8: Device PostureStatus Changed**
   * Add the following entity mappings:
     * Map `IPCustomEntity` → `IP.Address`
     * Map `HostCustomEntity` → `Host.HostName` (if available)
 
-* [ ] **Rule 9: Log Collector Suspended**
+* [C-AI 2023-08-12] **Rule 9: Log Collector Suspended**
   * Add the following entity mappings:
     * Map `IPCustomEntity` → `IP.Address`
     * Map `HostCustomEntity` → `Host.HostName` (if available)
 
-* [ ] **Rule 10: Log Files Deleted**
+* [C-AI 2023-08-12] **Rule 10: Log Files Deleted**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `HostCustomEntity` → `Host.HostName`
     * Map `IPCustomEntity` → `IP.Address`
 
 ### 1.2. Box Analytics Rules
-* [ ] **Rule 3: Forbidden File Type**
+* [C-AI 2023-08-12] **Rule 3: Forbidden File Type**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Map `FileCustomEntity` → `File.Name` (if available)
 
-* [ ] **Rule 4: Inactive User Login**
+* [C-AI 2023-08-12] **Rule 4: Inactive User Login**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Update KQL to extract additional user attributes
 
-* [ ] **Rule 5: Item Shared to External Entity**
+* [C-AI 2023-08-12] **Rule 5: Item Shared to External Entity**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `FileCustomEntity` → `File.Name` (for shared item)

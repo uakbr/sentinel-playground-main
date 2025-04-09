@@ -597,7 +597,7 @@
         "description": "Detects when device changes IP address in last 24 hours.",
         "displayName": "CiscoISE - Device changed IP in last 24 hours",
         "enabled": false,
-        "query": "let lbtime_48h = 48h;\n let lbtime_24h = 24h;\n CiscoISEEvent\n | where TimeGenerated between (ago(lbtime_48h) .. ago(lbtime_24h))\n | where notempty(DvcIpAddr) and notempty(DvcHostname)\n | summarize knownIPs = make_set(DvcIpAddr) by DvcHostname\n | join (CiscoISEEvent\n | where TimeGenerated > ago(lbtime_24h)\n | where notempty(DvcIpAddr) and notempty(DvcHostname)\n | summarize evts = count() by DvcHostname, DvcIpAddr\n | project-away evts) on DvcHostname\n | project-away DvcHostname1\n | where knownIPs !contains DvcIpAddr\n | extend HostCustomEntity = DvcHostname\n | extend IPCustomEntity = DvcIpAddr",
+        "query": "let lbtime_48h = 48h;\n let lbtime_24h = 24h;\n CiscoISEEvent\n | where TimeGenerated between (ago(lbtime_48h) .. ago(lbtime_24h))\n | where notempty(DvcIpAddr) and notempty(DvcHostname)\n | summarize knownIPs = make_set(DvcIpAddr) by DvcHostname\n | join (CiscoISEEvent\n | where TimeGenerated > ago(lbtime_24h)\n | where notempty(DvcIpAddr) and notempty(DvcHostname)\n | summarize evts = count() by DvcHostname, DvcIpAddr, TimeGenerated\n | project-away evts) on DvcHostname\n | project-away DvcHostname1\n | where knownIPs !contains DvcIpAddr\n | extend OldIPAddress = tostring(knownIPs)\n | extend HostCustomEntity = DvcHostname\n | extend IPCustomEntity = DvcIpAddr\n | extend IPCustomEntity_old = OldIPAddress",
         "queryFrequency": "PT1H",
         "queryPeriod": "PT1H",
         "severity": "Medium",
@@ -623,6 +623,15 @@
                 "columnName": "IPCustomEntity"
               }
             ]
+          },
+          {
+            "entityType": "IP",
+            "fieldMappings": [
+              {
+                "identifier": "Address",
+                "columnName": "IPCustomEntity_old"
+              }
+            ]
           }
         ]
       }
@@ -640,7 +649,7 @@
         "description": "Detects when device changes PostureStatus from \"Compliant\".",
         "displayName": "CiscoISE - Device PostureStatus changed to non-compliant",
         "enabled": false,
-        "query": "let lbtime_48h = 48h;\n let lbtime_24h = 24h;\n let lbtime_now = now();\n let compliantIPs = CiscoISEEvent\n | where TimeGenerated between (ago(lbtime_48h) .. ago(lbtime_24h))\n | where PostureStatus == 'Compliant'\n | summarize makelist(DstIpAddr)\n ;\n CiscoISEEvent\n | where TimeGenerated between (ago(lbtime_24h) .. lbtime_now)\n | where PostureStatus != 'Compliant'\n | where DstIpAddr in (compliantIPs)\n | project DstIpAddr\n | extend IPCustomEntity = DstIpAddr",
+        "query": "let lbtime_48h = 48h;\n let lbtime_24h = 24h;\n let lbtime_now = now();\n let compliantIPs = CiscoISEEvent\n | where TimeGenerated between (ago(lbtime_48h) .. ago(lbtime_24h))\n | where PostureStatus == 'Compliant'\n | summarize makelist(DstIpAddr)\n ;\n CiscoISEEvent\n | where TimeGenerated between (ago(lbtime_24h) .. lbtime_now)\n | where PostureStatus != 'Compliant'\n | where DstIpAddr in (compliantIPs)\n | project DstIpAddr, DvcHostname = iff(isnotempty(DvcHostname), DvcHostname, '')\n | extend IPCustomEntity = DstIpAddr\n | extend HostCustomEntity = DvcHostname",
         "queryFrequency": "PT15M",
         "queryPeriod": "PT15M",
         "severity": "Medium",
@@ -660,6 +669,15 @@
                 "columnName": "IPCustomEntity"
               }
             ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "HostCustomEntity"
+              }
+            ]
           }
         ]
       }
@@ -677,7 +695,7 @@
         "description": "Detects when log collector was suspended.",
         "displayName": "CiscoISE - Log collector was suspended",
         "enabled": false,
-        "query": "let lbtime = 10m;\n CiscoISEEvent\n | where TimeGenerated > ago(lbtime)\n | where EventId == '59207'\n | project TimeGenerated, SrcIpAddr, DstIpAddr\n | extend IPCustomEntity = DstIpAddr",
+        "query": "let lbtime = 10m;\n CiscoISEEvent\n | where TimeGenerated > ago(lbtime)\n | where EventId == '59207'\n | project TimeGenerated, SrcIpAddr, DstIpAddr, DvcHostname = iff(isnotempty(DvcHostname), DvcHostname, '')\n | extend IPCustomEntity = DstIpAddr\n | extend HostCustomEntity = DvcHostname",
         "queryFrequency": "PT10M",
         "queryPeriod": "PT10M",
         "severity": "Medium",
@@ -695,6 +713,15 @@
               {
                 "identifier": "Address",
                 "columnName": "IPCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "HostName",
+                "columnName": "HostCustomEntity"
               }
             ]
           }
