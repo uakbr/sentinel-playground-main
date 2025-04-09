@@ -106,21 +106,25 @@
     * Map `IPCustomEntity` → `IP.Address`
     * Include timestamp and admin privilege level
 
-* [ ] **Rule 10: User Role Changed to Owner**
+* [C-AI 2023-08-12] **Rule 10: User Role Changed to Owner**
+  * Add the following entity mappings:
+    * Map `AccountCustomEntity` → `Account.FullName`
+    * Map changed resource as a custom entity
+    * Include previous and new role information
 
 ### 1.3. Ubiquiti Analytics Rules
-* [ ] **Identify All Rules**
+* [C-AI 2023-08-12] **Identify All Rules**
   * Review all 10 Ubiquiti rules in the template
     * Extract rule names, IDs, and current query structure
     * Document current entity extraction in queries
   
-* [ ] **Map Common Entities**
+* [C-AI 2023-08-12] **Map Common Entities**
   * For each rule, determine needed entities:
     * User/Account entities from login events
     * Host entities from device information
     * IP entities from network traffic
   
-* [ ] **Implement Consistent Mappings**
+* [C-AI 2023-08-12] **Implement Consistent Mappings**
   * Standardize entity mapping approach:
     * Use consistent field names across rules
     * Align with Microsoft Security Graph data model
@@ -128,39 +132,39 @@
 
 ## 2. Parser Updates
 ### 2.1. CrowdStrike Parser Updates
-* [ ] **Create New Parser Function**
+* [C-AI 2023-08-12] **Create New Parser Function**
   * Develop CrowdStrikeFalconEventStream parser:
     * Use SecureHats_CL table as the data source
     * Filter with LogSourceType == "CrowdStrike_CL"
     * Maintain field naming conventions from original parser
 
-* [ ] **Update Query Logic**
+* [C-AI 2023-08-12] **Update Query Logic**
   * Modify field extraction from RawData:
     * Extract JSON or structured data from RawData field
     * Use parse_json() for nested JSON objects
     * Normalize field names to match original parser
 
-* [ ] **Dynamic Type Casting**
+* [C-AI 2023-08-12] **Dynamic Type Casting**
   * Implement proper data type conversion:
     * Convert string timestamps to datetime
     * Handle numeric fields appropriately
     * Preserve arrays and complex objects
 
 ### 2.2. Version Number Updates
-* [ ] **Identify Current Versions**
+* [C-AI 2023-08-12] **Identify Current Versions**
   * For each parser function:
     * Document current version number in comments
     * Track version history if available
     * Create changelog for modifications
 
-* [ ] **Version Increment Strategy**
+* [C-AI 2023-08-12] **Version Increment Strategy**
   * Establish versioning convention:
     * Major version for breaking changes
     * Minor version for field additions/enhancements
     * Patch version for bug fixes
     * Update version numbers for all modified parsers
 
-* [ ] **Documentation Updates**
+* [C-AI 2023-08-12] **Documentation Updates**
   * Include version information in parser headers:
     * Add last modified date
     * Document changes in comments

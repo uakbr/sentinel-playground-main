@@ -642,7 +642,7 @@
         "description": "Detects when user collaboration role is changed to owner.",
         "displayName": "Box - User role changed to owner",
         "enabled": false,
-        "query": "let lbperiod = 14d;\nlet lbtime = 1h;\nBoxEvents\n| where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n| where EventType =~ 'COLLABORATION_INVITE'\n| where AdditionalDetailsRole !~ 'Owner'\n| summarize min(TimeGenerated) by AccessibleByName, FileDirectory, AdditionalDetailsRole\n| project AccessibleByName, FileDirectory, InitialRole = AdditionalDetailsRole\n|join (BoxEvents\n          | where EventType =~ 'COLLABORATION_ROLE_CHANGE'\n          | summarize max(TimeGenerated) by AccessibleByName, FileDirectory, AdditionalDetailsRole\n          | project AccessibleByName, FileDirectory, NewRole = AdditionalDetailsRole\n          ) on FileDirectory, AccessibleByName\n| where NewRole =~ 'Owner'\n| project AccessibleByName, FileDirectory\n| extend AccountCustomEntity = AccessibleByName\n",
+        "query": "let lbperiod = 14d;\nlet lbtime = 1h;\nBoxEvents\n| where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n| where EventType =~ 'COLLABORATION_INVITE'\n| where AdditionalDetailsRole !~ 'Owner'\n| summarize min(TimeGenerated) by AccessibleByName, FileDirectory, AdditionalDetailsRole\n| project AccessibleByName, FileDirectory, InitialRole = AdditionalDetailsRole\n|join (BoxEvents\n          | where EventType =~ 'COLLABORATION_ROLE_CHANGE'\n          | summarize max(TimeGenerated) by AccessibleByName, FileDirectory, AdditionalDetailsRole\n          | project AccessibleByName, FileDirectory, NewRole = AdditionalDetailsRole\n          ) on FileDirectory, AccessibleByName\n| where NewRole =~ 'Owner'\n| extend UserEmail = AccessibleByLogin\n| extend ResourcePath = FileDirectory\n| extend RoleChangeDetails = strcat(\"Changed from '\", InitialRole, \"' to '\", NewRole, \"'\")\n| extend AccountCustomEntity = AccessibleByName",
         "queryFrequency": "PT1H",
         "queryPeriod": "P14D",
         "severity": "Medium",
@@ -660,6 +660,24 @@
               {
                 "identifier": "FullName",
                 "columnName": "AccountCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "URL",
+            "fieldMappings": [
+              {
+                "identifier": "Url",
+                "columnName": "ResourcePath"
+              }
+            ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "CommandLine",
+                "columnName": "RoleChangeDetails"
               }
             ]
           }
@@ -683,8 +701,8 @@
           "graphQueries": [
             {
               "metricName": "Box events",
-              "legend": "BoxEvents_CL",
-              "baseQuery": "BoxEvents_CL"
+              "legend": "BoxEvents",
+              "baseQuery": "BoxEvents"
             }
           ],
           "sampleQueries": [
@@ -695,15 +713,15 @@
           ],
           "dataTypes": [
             {
-              "name": "BoxEvents_CL",
-              "lastDataReceivedQuery": "BoxEvents_CL\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+              "name": "BoxEvents",
+              "lastDataReceivedQuery": "BoxEvents\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
             }
           ],
           "connectivityCriterias": [
             {
               "type": "IsConnectedQuery",
               "value": [
-                "BoxEvents_CL\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(1d)"
+                "BoxEvents\n            | summarize LastLogReceived = max(TimeGenerated)\n            | project IsConnected = LastLogReceived > ago(1d)"
               ]
             }
           ],
