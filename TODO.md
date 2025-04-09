@@ -82,35 +82,31 @@
     * Map `FileCustomEntity` → `File.Name` (for shared item)
     * Add mapping for external entity as a custom entity
 
-* [ ] **Rule 6: Many Items Deleted**
+* [C-AI 2023-08-12] **Rule 6: Many Items Deleted**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map bulk delete events to a custom entity
     * Include count and timestamp fields
 
-* [ ] **Rule 7: New External User**
+* [C-AI 2023-08-12] **Rule 7: New External User**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Add external domain mapping if available
 
-* [ ] **Rule 8: File Containing Sensitive Data**
+* [C-AI 2023-08-12] **Rule 8: File Containing Sensitive Data**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Map `FileCustomEntity` → `File.Name` with sensitivity level
 
-* [ ] **Rule 9: User Logged in as Admin**
+* [C-AI 2023-08-12] **Rule 9: User Logged in as Admin**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Include timestamp and admin privilege level
 
 * [ ] **Rule 10: User Role Changed to Owner**
-  * Add the following entity mappings:
-    * Map `AccountCustomEntity` → `Account.FullName`
-    * Map changed resource as a custom entity
-    * Include previous and new role information
 
 ### 1.3. Ubiquiti Analytics Rules
 * [ ] **Identify All Rules**

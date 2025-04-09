@@ -410,7 +410,7 @@
         "description": "Detects when a user deletes many items in short period of time.",
         "displayName": "Box - Many items deleted by user",
         "enabled": false,
-        "query": "let threshold = 100;\nBoxEvents\n| where EventType =~ 'DELETE'\n| summarize deleted_items = dcount(SourceItemName) by SrcUserName, bin(TimeGenerated, 5m)\n| where deleted_items > threshold\n| extend AccountCustomEntity = SrcUserName\n",
+        "query": "let threshold = 100;\nBoxEvents\n| where EventType =~ 'DELETE'\n| summarize deleted_items = dcount(SourceItemName) by SrcUserName, bin(TimeGenerated, 5m)\n| where deleted_items > threshold\n| extend DeletedItemCount = deleted_items\n| extend DeleteTime = TimeGenerated\n| extend BulkDeleteOperation = strcat(\"Items: \", tostring(deleted_items), \", Time: \", TimeGenerated)\n| extend AccountCustomEntity = SrcUserName",
         "queryFrequency": "PT1H",
         "queryPeriod": "PT1H",
         "severity": "Medium",
@@ -430,6 +430,15 @@
                 "columnName": "AccountCustomEntity"
               }
             ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "CommandLine",
+                "columnName": "BulkDeleteOperation"
+              }
+            ]
           }
         ]
       }
@@ -447,7 +456,7 @@
         "description": "Detects when new user created with SourceLogin containing non-corporate domain.",
         "displayName": "Box - New external user",
         "enabled": false,
-        "query": "BoxEvents\n| where EventType =~ 'NEW_USER'\n| extend corp_domain = extract(@'@(.*)', 1, SourceLogin)\n| extend new_domain = tolower(extract(@'@(.*)', 1, SourceLogin))\n| where corp_domain != new_domain\n| extend AccountCustomEntity = SourceLogin\n| extend IPCustomEntity = SrcIpAddr\n",
+        "query": "BoxEvents\n| where EventType =~ 'NEW_USER'\n| extend corp_domain = extract(@'@(.*)', 1, SourceLogin)\n| extend new_domain = tolower(extract(@'@(.*)', 1, SourceLogin))\n| where corp_domain != new_domain\n| extend ExternalDomain = new_domain\n| extend UserEmail = SourceLogin\n| extend UserName = SourceName\n| extend AccountCustomEntity = SourceLogin\n| extend IPCustomEntity = SrcIpAddr",
         "queryFrequency": "PT1H",
         "queryPeriod": "PT1H",
         "severity": "Medium",
@@ -466,6 +475,14 @@
               {
                 "identifier": "FullName",
                 "columnName": "AccountCustomEntity"
+              },
+              {
+                "identifier": "DisplayName",
+                "columnName": "UserName"
+              },
+              {
+                "identifier": "Email",
+                "columnName": "UserEmail"
               }
             ]
           },
@@ -475,6 +492,15 @@
               {
                 "identifier": "Address",
                 "columnName": "IPCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "DNS",
+            "fieldMappings": [
+              {
+                "identifier": "DomainName",
+                "columnName": "ExternalDomain"
               }
             ]
           }
@@ -494,7 +520,7 @@
         "description": "Detects files which potentialy may contain sensitive data such as passwords, authentication tokens, secret keys.",
         "displayName": "Box - File containing sensitive data",
         "enabled": false,
-        "query": "BoxEvents\n| where SourceItemName =~ 'id_rsa' or SourceItemName contains 'password' or SourceItemName contains 'key' or SourceItemName contains '_key' or SourceItemName contains '.ssh' or SourceItemName endswith '.npmrc' or SourceItemName endswith '.muttrc' or SourceItemName contains 'config.json' or SourceItemName contains '.gitconfig' or SourceItemName endswith '.netrc' or SourceItemName endswith 'package.json' or SourceItemName endswith 'Gemfile' or SourceItemName endswith 'bower.json' or SourceItemName endswith 'config.gypi' or SourceItemName endswith 'travis.yml' or SourceFileName =~ 'id_rsa' or SourceFileName contains 'password' or SourceFileName contains 'key' or SourceFileName contains '_key' or SourceFileName contains '.ssh' or SourceFileName endswith '.npmrc' or SourceFileName endswith '.muttrc' or SourceFileName contains 'config.json' or SourceFileName contains '.gitconfig' or SourceFileName endswith '.netrc' or SourceFileName endswith 'package.json' or SourceFileName endswith 'Gemfile' or SourceFileName contains 'bower.json' or SourceFileName contains 'config.gypi' or SourceFileName contains 'travis.yml'\n| extend AccountCustomEntity = SrcUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+        "query": "BoxEvents\n| where SourceItemName =~ 'id_rsa' or SourceItemName contains 'password' or SourceItemName contains 'key' or SourceItemName contains '_key' or SourceItemName contains '.ssh' or SourceItemName endswith '.npmrc' or SourceItemName endswith '.muttrc' or SourceItemName contains 'config.json' or SourceItemName contains '.gitconfig' or SourceItemName endswith '.netrc' or SourceItemName endswith 'package.json' or SourceItemName endswith 'Gemfile' or SourceItemName endswith 'bower.json' or SourceItemName endswith 'config.gypi' or SourceItemName endswith 'travis.yml' or SourceFileName =~ 'id_rsa' or SourceFileName contains 'password' or SourceFileName contains 'key' or SourceFileName contains '_key' or SourceFileName contains '.ssh' or SourceFileName endswith '.npmrc' or SourceFileName endswith '.muttrc' or SourceFileName contains 'config.json' or SourceFileName contains '.gitconfig' or SourceFileName endswith '.netrc' or SourceFileName endswith 'package.json' or SourceFileName endswith 'Gemfile' or SourceFileName contains 'bower.json' or SourceFileName contains 'config.gypi' or SourceFileName contains 'travis.yml'\n| extend SensitiveFile = coalesce(SourceItemName, SourceFileName)\n| extend SensitivityLevel = case(\n  SensitiveFile contains \"password\" or SensitiveFile =~ \"id_rsa\" or SensitiveFile contains \".ssh\", \"High\", \n  SensitiveFile contains \"key\" or SensitiveFile contains \"_key\" or SensitiveFile contains \"token\", \"Medium\", \n  \"Low\")\n| extend FileDetails = strcat(SensitiveFile, \" (Sensitivity: \", SensitivityLevel, \")\")\n| extend FileCustomEntity = SensitiveFile\n| extend AccountCustomEntity = SrcUserName\n| extend IPCustomEntity = SrcIpAddr",
         "queryFrequency": "PT1H",
         "queryPeriod": "PT1H",
         "severity": "Medium",
@@ -523,6 +549,28 @@
                 "columnName": "IPCustomEntity"
               }
             ]
+          },
+          {
+            "entityType": "File",
+            "fieldMappings": [
+              {
+                "identifier": "Name",
+                "columnName": "FileCustomEntity"
+              },
+              {
+                "identifier": "Directory",
+                "columnName": "FileDirectory"
+              }
+            ]
+          },
+          {
+            "entityType": "SecurityAlert",
+            "fieldMappings": [
+              {
+                "identifier": "AlertName",
+                "columnName": "FileDetails"
+              }
+            ]
           }
         ]
       }
@@ -540,7 +588,7 @@
         "description": "Detects when user logged in as admin.",
         "displayName": "Box - User logged in as admin",
         "enabled": false,
-        "query": "let lbperiod_start = 14d;\nlet lbperiod_end = 1d;\nlet admins = BoxEvents\n| where TimeGenerated between (ago(lbperiod_start) .. ago(lbperiod_end))\n| where EventType =~ 'ADMIN_LOGIN'\n| summarize makeset(SourceLogin);\nBoxEvents\n| where EventType =~ 'ADMIN_LOGIN'\n| where SourceLogin !in (admins)\n| extend AccountCustomEntity = SourceLogin\n| extend IPCustomEntity = SrcIpAddr\n",
+        "query": "let lbperiod_start = 14d;\nlet lbperiod_end = 1d;\nlet admins = BoxEvents\n| where TimeGenerated between (ago(lbperiod_start) .. ago(lbperiod_end))\n| where EventType =~ 'ADMIN_LOGIN'\n| summarize makeset(SourceLogin);\nBoxEvents\n| where EventType =~ 'ADMIN_LOGIN'\n| where SourceLogin !in (admins)\n| extend AdminLoginTime = TimeGenerated\n| extend AdminPrivilegeLevel = \"Full Admin Access\"\n| extend UserEmail = SourceLogin\n| extend UserName = SourceName\n| extend AccountCustomEntity = SourceLogin\n| extend IPCustomEntity = SrcIpAddr",
         "queryFrequency": "PT1H",
         "queryPeriod": "P14D",
         "severity": "Medium",
@@ -558,6 +606,14 @@
               {
                 "identifier": "FullName",
                 "columnName": "AccountCustomEntity"
+              },
+              {
+                "identifier": "DisplayName",
+                "columnName": "UserName"
+              },
+              {
+                "identifier": "Email",
+                "columnName": "UserEmail"
               }
             ]
           },
