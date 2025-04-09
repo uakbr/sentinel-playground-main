@@ -183,7 +183,7 @@
           "displayName": "CrowdStrike Falcon Event Stream Parser",
           "category": "Security",
           "functionAlias": "CrowdStrikeFalconEventStream",
-          "query": "SecureHats_CL\n| where LogSourceType == \"CrowdStrike_CL\"\n| extend EventVendor = 'CrowdStrike'\n| extend EventProduct = 'FalconHost'\n| extend DeviceVendor_s = EventVendor\n| extend DeviceProduct_s = EventProduct\n| extend RawData = tostring(RawData)\n| extend EventType = extract(\"EventType\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend EventType_s = EventType\n| extend Severity = extract(\"SeverityName\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend DstHostName = extract(\"DstHostname\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend DstHostName_s = DstHostName\n| extend SrcIpAddr = extract(\"SrcIpAddr\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend DstUserName = extract(\"UserName\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend DstUserName_s = DstUserName\n| extend FileName = extract(\"FileName\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend FilePath = extract(\"FilePath\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend FileHash = extract(\"SHA256String\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend Activity = extract(\"TechniqueId\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend Message = extract(\"DetectDescription\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend Technique = extract(\"TacticId\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| extend SensorId = extract(\"SensorId\\\\\\\":(\\\\d+),\", 1, RawData)",
+          "query": "SecureHats_CL\n| where LogSourceType == \"CrowdStrike_CL\"\n// Add version information and performance optimizations\n// Version: 1.1 - Performance optimized with early filtering and optimized extraction\n// Extract only necessary fields from RawData to improve performance\n| extend RawData = tostring(RawData)\n| extend EventType = extract(\"EventType\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData)\n| where isnotempty(EventType) // Apply early filtering\n| extend \n  EventVendor = 'CrowdStrike',\n  EventProduct = 'FalconHost',\n  Severity = extract(\"SeverityName\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  DstHostName = extract(\"DstHostname\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  SrcIpAddr = extract(\"SrcIpAddr\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  DstUserName = extract(\"UserName\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  FileName = extract(\"FileName\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  FilePath = extract(\"FilePath\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  FileHash = extract(\"SHA256String\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  Activity = extract(\"TechniqueId\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  Message = extract(\"DetectDescription\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  Technique = extract(\"TacticId\\\\\\\":\\\\\\\"([^\\\"]*)\\\\\\\"\", 1, RawData),\n  SensorId = extract(\"SensorId\\\\\\\":(\\\\d+),\", 1, RawData)\n// Add extra fields for backward compatibility\n| extend EventType_s = EventType, DstHostName_s = DstHostName, DstUserName_s = DstUserName, DeviceVendor_s = EventVendor, DeviceProduct_s = EventProduct\n// Remove unused fields to improve performance\n| project-away LogSourceType",
           "functionParameters": ""
         }
       },
@@ -222,7 +222,7 @@
             ],
             "dataTypes": [
               {
-                "name": "SecureHats_CL (CrowdStrikeFalconEventStream)",
+                "name": "CrowdStrike Falcon Events",
                 "lastDataReceivedQuery": "SecureHats_CL \n| where LogSourceType == \"CrowdStrike_CL\"\n | summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
               }
             ],
@@ -352,7 +352,7 @@
             ],
             "dataTypes": [
               {
-                "name": "SecureHats_CL (CrowdstrikeReplicator)",
+                "name": "CrowdStrike Falcon Data Replicator Events",
                 "lastDataReceivedQuery": "SecureHats_CL\n| where LogSourceType == \"CrowdstrikeReplicator_CL\"\n | summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
               }
             ],
@@ -647,7 +647,7 @@
             ],
             "dataTypes": [
               {
-                "name": "SecureHats_CL (CrowdstrikeReplicator)",
+                "name": "CrowdStrike Falcon Data Replicator Events",
                 "lastDataReceivedQuery": "SecureHats_CL\n| where LogSourceType == \"CrowdstrikeReplicator_CL\"\n | summarize Time = max(TimeGenerated)\n | where isnotempty(Time)"
               }
             ],
@@ -3273,7 +3273,8 @@
                 }
               }
             },
-            "contentVersion": "1.0.0.0"
+            "contentVersion": "1.0.0.0",
+            "outputs": {}
           },
           "parameters": {
             "$connections": {

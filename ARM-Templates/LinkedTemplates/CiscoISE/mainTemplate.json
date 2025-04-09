@@ -497,7 +497,7 @@
         "description": "Detects command execution with PrivilegeLevel - 15 from new source.",
         "displayName": "CiscoISE - Command executed with the highest privileges from new IP",
         "enabled": false,
-        "query": "let lbperiod = 60d;\n let lbtime = 15m;\n let knownAdminIpList =\n CiscoISEEvent\n | where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n | where PrivilegeLevel == '15'\n | summarize makelist(SrcIpAddr)\n ;\n CiscoISEEvent\n | where TimeGenerated > ago(lbtime)\n | where PrivilegeLevel == '15'\n | where SrcIpAddr !in (knownAdminIpList)\n | project TimeGenerated, SrcIpAddr, DstIpAddr, DstUserName, CmdSet\n | extend AccountCustomEntity = DstUserName\n | extend IPCustomEntity = SrcIpAddr",
+        "query": "let lbperiod = 60d;\n let lbtime = 15m;\n let knownAdminIpList =\n CiscoISEEvent\n | where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n | where PrivilegeLevel == '15'\n | summarize makelist(SrcIpAddr)\n ;\n CiscoISEEvent\n | where TimeGenerated > ago(lbtime)\n | where PrivilegeLevel == '15'\n | where SrcIpAddr !in (knownAdminIpList)\n | project TimeGenerated, SrcIpAddr, DstIpAddr, DstUserName, CmdSet\n | extend AccountCustomEntity = DstUserName\n | extend IPCustomEntity = SrcIpAddr\n | extend CommandDetails = CmdSet",
         "queryFrequency": "PT5M",
         "queryPeriod": "PT5M",
         "severity": "Medium",
@@ -528,6 +528,15 @@
               {
                 "identifier": "Address",
                 "columnName": "IPCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "CommandLine",
+                "columnName": "CommandDetails"
               }
             ]
           }
@@ -547,7 +556,7 @@
         "description": "Detects command execution with PrivilegeLevel - 15 by user for wich there was no such activity detected earlier.",
         "displayName": "CiscoISE - Command executed with the highest privileges by new user",
         "enabled": false,
-        "query": "let lbperiod = 60d;\n let lbtime = 15m;\n let knownPrivUsers =\n CiscoISEEvent\n | where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n | where PrivilegeLevel == '15'\n | summarize makelist(DstUserName)\n ;\n CiscoISEEvent\n | where TimeGenerated > ago(lbtime)\n | where PrivilegeLevel == '15'\n | where DstUserName !in (knownPrivUsers)\n | project TimeGenerated, SrcIpAddr, DstIpAddr, DstUserName, CmdSet\n | extend AccountCustomEntity = DstUserName\n | extend IPCustomEntity = SrcIpAddr",
+        "query": "let lbperiod = 60d;\n let lbtime = 15m;\n let knownPrivUsers =\n CiscoISEEvent\n | where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n | where PrivilegeLevel == '15'\n | summarize makelist(DstUserName)\n ;\n CiscoISEEvent\n | where TimeGenerated > ago(lbtime)\n | where PrivilegeLevel == '15'\n | where DstUserName !in (knownPrivUsers)\n | project TimeGenerated, SrcIpAddr, DstIpAddr, DstUserName, CmdSet\n | extend AccountCustomEntity = DstUserName\n | extend IPCustomEntity = SrcIpAddr\n | extend CommandDetails = CmdSet",
         "queryFrequency": "PT5M",
         "queryPeriod": "PT5M",
         "severity": "Medium",
@@ -578,6 +587,15 @@
               {
                 "identifier": "Address",
                 "columnName": "IPCustomEntity"
+              }
+            ]
+          },
+          {
+            "entityType": "Process",
+            "fieldMappings": [
+              {
+                "identifier": "CommandLine",
+                "columnName": "CommandDetails"
               }
             ]
           }

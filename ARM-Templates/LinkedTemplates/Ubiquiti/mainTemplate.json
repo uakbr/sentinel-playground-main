@@ -579,7 +579,7 @@
           ],
           "dataTypes": [
             {
-              "name": "Ubiquiti_CL",
+              "name": "Ubiquiti Network Events",
               "lastDataReceivedQuery": "UbiquitiAuditEvent\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
             }
           ],

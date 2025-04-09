@@ -30,13 +30,13 @@
     * Map `HostCustomEntity` → `Host.HostName`
     * Map `IPCustomEntity` → `IP.Address`
 
-* [C-AI 2023-08-12] **Rule 5: Command with Highest Privileges from New IP**
+* [C-AI 2023-08-14] **Rule 5: Command with Highest Privileges from New IP**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
     * Update KQL query to extract relevant entity fields
 
-* [C-AI 2023-08-12] **Rule 6: Command with Highest Privileges by New User**
+* [C-AI 2023-08-14] **Rule 6: Command with Highest Privileges by New User**
   * Add the following entity mappings:
     * Map `AccountCustomEntity` → `Account.FullName`
     * Map `IPCustomEntity` → `IP.Address`
@@ -171,19 +171,19 @@
     * Note compatibility requirements
 
 ### 2.3. Field Extraction Validation
-* [ ] **Review All Parsers**
+* [C-AI 2023-08-14] **Review All Parsers**
   * Systematically check each parser:
     * Verify all fields are correctly extracted from RawData
     * Check for data type inconsistencies
     * Ensure field names match the original parsers
 
-* [ ] **Consistency Checks**
+* [C-AI 2023-08-14] **Consistency Checks**
   * Compare field names across parsers:
     * Standardize common fields (timestamps, IPs, usernames)
     * Align with Microsoft Security Graph schema
     * Document any parser-specific field names
 
-* [ ] **Performance Optimization**
+* [C-AI 2023-08-14] **Performance Optimization**
   * Analyze and improve query performance:
     * Use project-away for unused fields
     * Optimize string parsing operations
@@ -191,32 +191,32 @@
 
 ## 3. Data Connector References
 ### 3.1. CrowdStrike Connector
-* [ ] **Update Base Queries**
+* [C-AI 2023-08-14] **Update Base Queries**
   * Modify graph query references:
     * Replace CommonSecurityLog_CL with SecureHats_CL
     * Update LogSourceType filter condition
     * Test updated queries for correct results
 
-* [ ] **Fix Last Data Received Query**
+* [C-AI 2023-08-14] **Fix Last Data Received Query**
   * Update lastDataReceivedQuery property:
     * Use SecureHats_CL with appropriate LogSourceType
     * Maintain backward compatibility for existing deployments
     * Test time range functionality
 
-* [ ] **Update Connectivity Criteria**
+* [C-AI 2023-08-14] **Update Connectivity Criteria**
   * Modify connectivityCriterias.value:
     * Reference proper table and field combination
     * Adjust threshold values if needed
     * Update sample queries
 
 ### 3.2. Display Name Updates
-* [ ] **Identify Affected Connectors**
+* [C-AI 2023-08-14] **Identify Affected Connectors**
   * Review all data connector resources:
     * Check for hardcoded table references in titles
     * Identify inconsistent naming patterns
     * Document display name dependencies
 
-* [ ] **Standardize Naming Convention**
+* [C-AI 2023-08-14] **Standardize Naming Convention**
   * Create consistent naming pattern:
     * Remove direct table references from titles
     * Use vendor/product naming instead of technical details

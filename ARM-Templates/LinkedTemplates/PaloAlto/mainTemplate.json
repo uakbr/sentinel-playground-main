@@ -750,12 +750,12 @@
           ],
           "dataTypes": [
             {
-              "name": "PaloAltoPrismaCloudAlert_CL",
-              "lastDataReceivedQuery": "PaloAltoPrismaCloudAlert_CL\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+              "name": "Palo Alto Prisma Cloud Alerts",
+              "lastDataReceivedQuery": "PaloAltoPrismaCloudAlert\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
             },
             {
-              "name": "PaloAltoPrismaCloudAudit_CL",
-              "lastDataReceivedQuery": "PaloAltoPrismaCloudAudit_CL\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
+              "name": "Palo Alto Prisma Cloud Audit Events",
+              "lastDataReceivedQuery": "PaloAltoPrismaCloudAudit\n            | summarize Time = max(TimeGenerated)\n            | where isnotempty(Time)"
             }
           ],
           "connectivityCriterias": [
